@@ -58,7 +58,6 @@ export function CatchBoundary() {
       <head>
         <title>Oops!</title>
         <Meta />
-        <Links />
       </head>
       <body>
         <div className="p-4">
