@@ -37,7 +37,7 @@ export default function App() {
             <AppNavLink to="/">
               <HomeIcon />
             </AppNavLink>
-            <AppNavLink to="/tracker">
+            <AppNavLink to="/tracker/activities">
               <TimeIcon />
             </AppNavLink>
           </nav>
