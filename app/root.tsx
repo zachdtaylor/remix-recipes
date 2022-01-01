@@ -34,10 +34,10 @@ export default function App() {
       <body>
         <div className="flex h-screen">
           <nav className="bg-purple-900 text-white w-16">
-            <AppNavLink to="/">
+            <AppNavLink to="/home">
               <HomeIcon />
             </AppNavLink>
-            <AppNavLink to="/tracker/activities">
+            <AppNavLink to="/tracker">
               <TimeIcon />
             </AppNavLink>
           </nav>
@@ -85,7 +85,15 @@ function AppNavLink({
 }) {
   return (
     <NavLink to={to}>
-      <div className="py-4 text-center hover:bg-purple-700">{children}</div>
+      {({ isActive }) => (
+        <div
+          className={`py-4 text-center hover:bg-purple-700 ${
+            isActive ? "bg-purple-700" : ""
+          }`}
+        >
+          {children}
+        </div>
+      )}
     </NavLink>
   );
 }
