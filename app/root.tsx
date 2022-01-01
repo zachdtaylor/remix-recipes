@@ -9,17 +9,17 @@ import {
   ScrollRestoration,
   useCatch,
 } from "remix";
-import type { MetaFunction } from "remix";
+import type { MetaFunction, LinksFunction } from "remix";
 import { HomeIcon, TimeIcon } from "~/components/icons";
 import styles from "./tailwind.css";
 import React from "react";
 
-export function links() {
+export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: styles }];
-}
+};
 
 export const meta: MetaFunction = () => {
-  return { title: "New Remix App" };
+  return { title: "Remix Time Tracker" };
 };
 
 export default function App() {
