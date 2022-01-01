@@ -1,4 +1,5 @@
 import {
+  Link,
   Links,
   LiveReload,
   Meta,
@@ -6,6 +7,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useCatch,
 } from "remix";
 import type { MetaFunction } from "remix";
 import { HomeIcon, TimeIcon } from "~/components/icons";
@@ -44,6 +46,32 @@ export default function App() {
         <ScrollRestoration />
         <Scripts />
         {process.env.NODE_ENV === "development" && <LiveReload />}
+      </body>
+    </html>
+  );
+}
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        <div className="p-4">
+          <h1 className="text-2xl pb-3">
+            {caught.status === 404
+              ? "404 - Whoops, we couldn't find the page you're looking for."
+              : `${caught.status} ${caught.statusText}`}
+          </h1>
+          <Link to="/" className="text-purple-800">
+            Take me home
+          </Link>
+        </div>
+        <Scripts />
       </body>
     </html>
   );
