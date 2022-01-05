@@ -10,7 +10,7 @@ import {
   useCatch,
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
-import { HomeIcon, TimeIcon } from "~/components/icons";
+import { BookIcon, HomeIcon } from "~/components/icons";
 import styles from "./tailwind.css";
 import React from "react";
 
@@ -19,7 +19,7 @@ export const links: LinksFunction = () => {
 };
 
 export const meta: MetaFunction = () => {
-  return { title: "Remix Time Tracker" };
+  return { title: "Remix Recipies" };
 };
 
 export default function App() {
@@ -37,8 +37,8 @@ export default function App() {
             <AppNavLink to="/home">
               <HomeIcon />
             </AppNavLink>
-            <AppNavLink to="/tracker">
-              <TimeIcon />
+            <AppNavLink to="/software">
+              <BookIcon />
             </AppNavLink>
           </nav>
           <Outlet />

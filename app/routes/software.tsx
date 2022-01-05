@@ -1,21 +1,21 @@
 import React from "react";
 import { NavLink, Outlet } from "remix";
 
-export default function Tracker() {
+export default function Software() {
   return (
     <div className="mx-4 grow">
       <nav className="my-4 pb-2 border-b-2">
-        <TrackerNavLink to="activities" className="mr-4">
-          Activities
-        </TrackerNavLink>
-        <TrackerNavLink to="time">Time</TrackerNavLink>
+        <SoftwareNavLink to="recipies" className="mr-4">
+          Recipies
+        </SoftwareNavLink>
+        <SoftwareNavLink to="shopping-list">Shopping List</SoftwareNavLink>
       </nav>
       <Outlet />
     </div>
   );
 }
 
-function TrackerNavLink({
+function SoftwareNavLink({
   to,
   children,
   className,
