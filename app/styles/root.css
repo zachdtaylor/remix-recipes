@@ -1,0 +1,20 @@
+.root-container {
+  display: flex;
+  height: 100vh;
+}
+
+.root-container > nav {
+  background-color: var(--primary-color);
+  color: white;
+  width: 4rem;
+}
+
+.app-nav-link {
+  padding: 1rem 0;
+  text-align: center;
+}
+
+.app-nav-link:hover,
+.app-nav-link.-active {
+  background-color: var(--primary-color-light);
+}

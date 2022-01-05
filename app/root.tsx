@@ -11,11 +11,19 @@ import {
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
 import { BookIcon, HomeIcon } from "~/components/icons";
-import styles from "./tailwind.css";
+import tailwindStyles from "./tailwind.css";
+import theme from "./styles/theme.css";
+import sharedStyles from "./styles/shared.css";
+import styles from "./styles/root.css";
 import React from "react";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: styles }];
+  return [
+    { rel: "stylesheet", href: theme },
+    { rel: "stylesheet", href: styles },
+    { rel: "stylesheet", href: tailwindStyles },
+    { rel: "stylesheet", href: sharedStyles },
+  ];
 };
 
 export const meta: MetaFunction = () => {
@@ -32,8 +40,8 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <div className="flex h-screen">
-          <nav className="bg-purple-900 text-white w-16">
+        <div className="root-container">
+          <nav>
             <AppNavLink to="/home">
               <HomeIcon />
             </AppNavLink>
@@ -86,11 +94,7 @@ function AppNavLink({
   return (
     <NavLink to={to}>
       {({ isActive }) => (
-        <div
-          className={`py-4 text-center hover:bg-purple-700 ${
-            isActive ? "bg-purple-700" : ""
-          }`}
-        >
+        <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
           {children}
         </div>
       )}
