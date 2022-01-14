@@ -8,6 +8,7 @@ import {
   Scripts,
   ScrollRestoration,
   useCatch,
+  ErrorBoundaryComponent,
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
 import { BookIcon, HomeIcon } from "~/components/icons";
@@ -83,6 +84,10 @@ export function CatchBoundary() {
     </html>
   );
 }
+
+export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
+  return <div>{error.message}</div>;
+};
 
 function AppNavLink({
   to,

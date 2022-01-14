@@ -1,4 +1,4 @@
-import type { LoaderFunction } from "remix";
+import { LoaderFunction, Outlet, Link } from "remix";
 import { useLoaderData } from "remix";
 
 export const loader: LoaderFunction = () => {
@@ -19,9 +19,15 @@ export default function Recipies() {
   return (
     <div>
       <h1 className="text-xl mb-2">Recipies</h1>
-      {data.map((recipie) => (
-        <div key={recipie.id}>{recipie.name}</div>
-      ))}
+      <div className="flex flex-col">
+        {data.map((recipie) => (
+          <Link key={recipie.id} to={`${recipie.id}`}>
+            {recipie.name}
+          </Link>
+        ))}
+      </div>
+      <br />
+      <Outlet />
     </div>
   );
 }
