@@ -41,8 +41,8 @@ export default function App() {
         <Links />
       </head>
       <body>
-        <div className="root-container">
-          <nav>
+        <div className="root-container md:flex md:h-screen">
+          <nav className="flex w-full md:w-16 md:block">
             <AppNavLink to="/home">
               <HomeIcon />
             </AppNavLink>
@@ -97,7 +97,7 @@ function AppNavLink({
   children: React.ReactNode;
 }) {
   return (
-    <NavLink to={to}>
+    <NavLink to={to} className="w-16">
       {({ isActive }) => (
         <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
           {children}
