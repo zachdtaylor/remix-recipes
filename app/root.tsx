@@ -75,7 +75,7 @@ export function CatchBoundary() {
               ? "404 - Whoops, we couldn't find the page you're looking for."
               : `${caught.status} ${caught.statusText}`}
           </h1>
-          <Link to="/" className="text-purple-800">
+          <Link to="/" className="text-primary">
             Take me home
           </Link>
         </div>
