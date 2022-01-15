@@ -1,37 +1,18 @@
 import React from "react";
 import { NavLink, Outlet } from "remix";
+import { PageNav, PageTitle } from "~/components/nav";
 
 export default function Software() {
   return (
     <div className="mx-4 grow">
-      <nav className="my-4 pb-2 border-b-2">
-        <SoftwareNavLink to="recipies">Recipies</SoftwareNavLink>
-        <SoftwareNavLink to="shopping-list">Shopping List</SoftwareNavLink>
-      </nav>
+      <PageTitle>Software</PageTitle>
+      <PageNav
+        links={[
+          { to: "recipies", label: "Recipies" },
+          { to: "shopping-list", label: "Shopping List" },
+        ]}
+      />
       <Outlet />
     </div>
-  );
-}
-
-function SoftwareNavLink({
-  to,
-  children,
-  className,
-}: {
-  to: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <NavLink
-      to={to}
-      className={({ isActive }) =>
-        (className || "") +
-        (isActive ? " border-b-2 border-b-purple-800" : "") +
-        " pb-2.5 px-2"
-      }
-    >
-      {children}
-    </NavLink>
   );
 }
