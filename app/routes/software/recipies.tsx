@@ -1,32 +1,36 @@
 import { LoaderFunction, Outlet, Link } from "remix";
 import { useLoaderData } from "remix";
+import type { Recipie } from "@prisma/client";
+import { db } from "~/utils/db";
+import { ListCard } from "~/components/list";
 
-export const loader: LoaderFunction = () => {
-  return [
-    { id: 1, name: "Cheesy Potato Soup" },
-    { id: 2, name: "Chinese Casserole" },
-    { id: 3, name: "Breakfast Casserole" },
-  ];
+type LoaderData = {
+  recipies: Array<Recipie>;
 };
 
-type Recipie = {
-  id: number;
-  name: string;
+export const loader: LoaderFunction = async () => {
+  return {
+    recipies: await db.recipie.findMany(),
+  };
 };
 
 export default function Recipies() {
-  const data = useLoaderData<Recipie[]>();
+  const data = useLoaderData<LoaderData>();
   return (
-    <div>
-      <h1 className="text-xl mb-2">Recipies</h1>
-      <div className="flex flex-col">
-        {data.map((recipie) => (
-          <Link key={recipie.id} to={`${recipie.id}`}>
-            {recipie.name}
-          </Link>
-        ))}
+    <div className="lg:flex">
+      <div className="lg:w-1/3 lg:mr-8">
+        <h1 className="text-xl mb-2">Recipies</h1>
+        <ul>
+          {data.recipies.map((recipie) => (
+            <li className="my-4">
+              <Link key={recipie.id} to={recipie.id}>
+                <ListCard title={recipie.name} />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <br />
       </div>
-      <br />
       <Outlet />
     </div>
   );
