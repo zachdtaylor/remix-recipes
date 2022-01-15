@@ -11,9 +11,20 @@ datasource db {
 }
 
 model Recipie {
-  id           String   @id @default(uuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id           String       @id @default(uuid())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
   name         String
   instructions String
+  ingredients  Ingredient[]
+}
+
+model Ingredient {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  amount    String
+  recipieId String
+  recipie   Recipie  @relation(fields: [recipieId], references: [id])
 }
