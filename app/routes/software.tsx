@@ -4,7 +4,7 @@ import { PageNav, PageTitle } from "~/components/nav";
 
 export default function Software() {
   return (
-    <div className="mx-4 grow">
+    <div className="mx-4">
       <PageTitle>Software</PageTitle>
       <PageNav
         links={[

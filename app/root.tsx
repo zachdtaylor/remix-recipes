@@ -42,7 +42,7 @@ export default function App() {
       </head>
       <body>
         <div className="root-container md:flex md:h-screen">
-          <nav className="flex w-full md:w-16 md:block">
+          <nav className="flex shrink-0 w-full md:w-16 md:block">
             <AppNavLink to="/home">
               <HomeIcon />
             </AppNavLink>
@@ -50,7 +50,9 @@ export default function App() {
               <BookIcon />
             </AppNavLink>
           </nav>
-          <Outlet />
+          <div className="flex-grow">
+            <Outlet />
+          </div>
         </div>
         <ScrollRestoration />
         <Scripts />

@@ -31,7 +31,9 @@ export default function Recipies() {
         </ul>
         <br />
       </div>
-      <Outlet />
+      <div className="lg:w-2/3">
+        <Outlet />
+      </div>
     </div>
   );
 }
