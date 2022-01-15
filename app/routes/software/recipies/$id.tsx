@@ -1,12 +1,38 @@
-import { LoaderFunction, useFetcher, useLoaderData, useMatches } from "remix";
-import { Recipie as RecipieComponent } from "~/components/recipie";
+import type { Ingredient, Recipie } from "@prisma/client";
+import { LoaderFunction, useLoaderData } from "remix";
+import { Heading1, Heading2 } from "~/components/heading";
+import { db } from "~/utils/db";
 
-export const loader: LoaderFunction = ({ params }) => {
-  return { id: params.id, name: "Cheesy Potato Soup" };
+type LoaderData = {
+  recipie: Recipie & { ingredients: Array<Ingredient> };
+};
+export const loader: LoaderFunction = async ({ params }) => {
+  return {
+    recipie: await db.recipie.findUnique({
+      where: { id: params.id },
+      include: { ingredients: true },
+    }),
+  };
 };
 
-export default function Recipie() {
-  return <RecipieComponent />;
+export default function RecipieRoute() {
+  const data = useLoaderData<LoaderData>();
+  return (
+    <div>
+      <Heading1>{data.recipie.name}</Heading1>
+      <hr className="my-4" />
+      <Heading2>Ingredients</Heading2>
+      <ul className="mb-4">
+        {data.recipie.ingredients.map((ingredient) => (
+          <li className="my-1">
+            {ingredient.amount} {ingredient.name}
+          </li>
+        ))}
+      </ul>
+      <Heading2>Instructions</Heading2>
+      <div>{data.recipie.instructions}</div>
+    </div>
+  );
 }
 
 export const handle = {

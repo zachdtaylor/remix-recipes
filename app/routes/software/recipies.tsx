@@ -1,4 +1,4 @@
-import { LoaderFunction, Outlet, Link } from "remix";
+import { LoaderFunction, Outlet, Link, useParams } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipie } from "@prisma/client";
 import { db } from "~/utils/db";
@@ -16,9 +16,10 @@ export const loader: LoaderFunction = async () => {
 
 export default function Recipies() {
   const data = useLoaderData<LoaderData>();
+  const params = useParams();
   return (
     <div className="lg:flex">
-      <div className="lg:w-1/3 lg:mr-8">
+      <div className={`${params.id ? "hidden" : ""} lg:block lg:w-1/3 lg:mr-8`}>
         <h1 className="text-xl mb-2">Recipies</h1>
         <ul>
           {data.recipies.map((recipie) => (

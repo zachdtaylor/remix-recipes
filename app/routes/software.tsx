@@ -12,7 +12,9 @@ export default function Software() {
           { to: "shopping-list", label: "Shopping List" },
         ]}
       />
-      <Outlet />
+      <div className="my-8">
+        <Outlet />
+      </div>
     </div>
   );
 }
