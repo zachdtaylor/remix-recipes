@@ -47,7 +47,7 @@ function getRecipies() {
     {
       name: "French Dip Sandwiches",
       instructions:
-        "Place roast in slow cooker and sprinkle onion soup mix over the roast. Add water and beef broth. Cook on high for 4-6 houts or low for 8-10. Serve on rolls with swiss cheese.",
+        "Place roast in slow cooker and sprinkle onion soup mix over the roast. Add water and beef broth. Cook on high for 4-6 hours or low for 8-10. Serve on rolls with swiss cheese.",
       ingredients: {
         create: [
           { amount: "", name: "Beef roast" },
