@@ -35,8 +35,12 @@ export default function Recipies() {
   const params = useParams();
   const location = useLocation();
   return (
-    <div className="lg:flex">
-      <div className={`${params.id ? "hidden" : ""} lg:block lg:w-1/3 lg:mr-8`}>
+    <div className="lg:flex h-full">
+      <div
+        className={`${
+          params.id ? "hidden" : ""
+        } lg:block lg:w-1/3 lg:mr-8 overflow-auto`}
+      >
         <Form>
           <input
             className="w-full py-3 px-2 border-2 border-gray-300 rounded-md"
@@ -60,7 +64,7 @@ export default function Recipies() {
         </ul>
         <br />
       </div>
-      <div className="lg:w-2/3">
+      <div className="lg:w-2/3 overflow-auto">
         <Outlet />
       </div>
     </div>

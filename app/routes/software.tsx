@@ -1,10 +1,9 @@
-import React from "react";
-import { NavLink, Outlet } from "remix";
-import { PageNav, PageTitle } from "~/components/nav";
+import { Outlet } from "remix";
+import { PageWrapper, PageNav, PageTitle, PageContent } from "~/components/lib";
 
 export default function Software() {
   return (
-    <div className="mx-4">
+    <PageWrapper>
       <PageTitle>Software</PageTitle>
       <PageNav
         links={[
@@ -12,9 +11,9 @@ export default function Software() {
           { to: "shopping-list", label: "Shopping List" },
         ]}
       />
-      <div className="my-8">
+      <PageContent>
         <Outlet />
-      </div>
-    </div>
+      </PageContent>
+    </PageWrapper>
   );
 }

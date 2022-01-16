@@ -76,5 +76,27 @@ function getRecipies() {
         ],
       },
     },
+    {
+      name: "Chicken Alfredo",
+      instructions:
+        "Melt butter in large pan. Add garlic and cook for 30 seconds. Whisk in flour and stir for another 30 seconds. Add cream cheese and stir until it starts to melt down. Pour in cream and parmesean and whisk until cream cheese is incorporated. Once the sauce has thickened, season with salt and pepper.\n\nCut chicken into thin pieces. In a shallow dish combine flour, 1 tsp salt and 1 tsp pepper. In another dish beat eggs. In a third dish combine bread crumbs and parmesean. Working with one piece at a time, dredge in flour, then egg, then bread crumb/parmesean mixture. Cover and place in a baking dish and bake at 350 for 50-60 minutes.\n\n(Sausage can also be added to this alfredo for a variation)",
+      ingredients: {
+        create: [
+          { amount: "1 stick", name: "butter" },
+          { amount: "4", name: "garlic cloves, minced" },
+          { amount: "2 tbsp", name: "flour" },
+          { amount: "8 oz", name: "cream cheese" },
+          { amount: "2 cups", name: "heavy cream" },
+          { amount: "1 1/3 cup", name: "grated parmesean cheese" },
+          { amount: "", name: "salt and pepper to taste" },
+          { amount: "1 pkg", name: "desired pasta" },
+          { amount: "2-3", name: "chicken breasts" },
+          { amount: "1 cup", name: "flour" },
+          { amount: "3", name: "eggs" },
+          { amount: "1 1/2 cup", name: "bread crumbs" },
+          { amount: "1 1/2 cup", name: "parmesean cheese" },
+        ],
+      },
+    },
   ];
 }

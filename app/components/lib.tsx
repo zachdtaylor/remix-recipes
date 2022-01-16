@@ -1,11 +1,16 @@
+import React from "react";
 import { NavLink } from "remix";
+
+export function PageWrapper({ children }: { children: React.ReactNode }) {
+  return <div className="px-4 pt-8 h-full flex flex-col">{children}</div>;
+}
 
 type PageTitleProps = {
   children: string;
 };
 
 export function PageTitle({ children }: PageTitleProps) {
-  return <h1 className="text-2xl font-bold my-8">{children}</h1>;
+  return <h1 className="text-2xl font-bold mb-8">{children}</h1>;
 }
 
 function PageNavLink({
@@ -37,7 +42,7 @@ type PageNavProps = {
 
 export function PageNav({ links }: PageNavProps) {
   return (
-    <nav className="my-4 pb-2 border-b-2">
+    <nav className="mt-4 pb-2 border-b-2">
       {links.map((link) => (
         <PageNavLink key={link.to} to={link.to}>
           {link.label}
@@ -45,4 +50,8 @@ export function PageNav({ links }: PageNavProps) {
       ))}
     </nav>
   );
+}
+
+export function PageContent({ children }: { children: React.ReactNode }) {
+  return <div className="py-8 flex-grow overflow-auto">{children}</div>;
 }
