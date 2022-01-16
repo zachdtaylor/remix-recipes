@@ -1,4 +1,12 @@
+import type { MetaFunction } from "remix";
 import { PageWrapper, PageTitle } from "~/components/lib";
+
+export const meta: MetaFunction = () => {
+  return {
+    title: "Home | Remix Recipies",
+    description: "Come find some good recipies!",
+  };
+};
 
 export default function Home() {
   return (
