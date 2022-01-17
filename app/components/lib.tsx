@@ -72,7 +72,7 @@ export function RecipieCard({ title, totalTime }: RecipieCardProps) {
 
 export function RecipieTime({ totalTime }: { totalTime: string }) {
   return (
-    <div className="flex font-light text-gray-600">
+    <div className="flex font-light text-gray-500">
       <TimeIcon />
       <p className="ml-1">{totalTime}</p>
     </div>
