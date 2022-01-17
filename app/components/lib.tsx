@@ -93,3 +93,11 @@ export function ErrorSection({
     </div>
   );
 }
+
+export function DeleteButton({ children }: { children: React.ReactNode }) {
+  return (
+    <button className="px-3 py-2 rounded-md border-2 text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
+      {children}
+    </button>
+  );
+}

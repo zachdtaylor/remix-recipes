@@ -7,7 +7,7 @@ export function createNewRecipie() {
       totalTime: "0 min",
       instructions: "How do you make this recipie?",
       ingredients: {
-        create: [{ amount: "a spoon", name: "full of sugar" }],
+        create: [{ amount: "a spoonful of", name: "sugar" }],
       },
     },
   });
@@ -28,5 +28,11 @@ export function searchRecipies(query: string | null) {
         mode: "insensitive",
       },
     },
+  });
+}
+
+export function deleteRecipie(id?: string) {
+  return db.recipie.delete({
+    where: { id: id },
   });
 }

@@ -81,7 +81,6 @@ export function CatchBoundary() {
             Take me home
           </Link>
         </div>
-        <Scripts />
       </body>
     </html>
   );
@@ -103,7 +102,6 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
             Take me home
           </Link>
         </div>
-        <Scripts />
       </body>
     </html>
   );

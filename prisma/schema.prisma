@@ -27,5 +27,5 @@ model Ingredient {
   name      String
   amount    String
   recipieId String
-  recipie   Recipie  @relation(fields: [recipieId], references: [id])
+  recipie   Recipie  @relation(fields: [recipieId], references: [id], onDelete: Cascade)
 }

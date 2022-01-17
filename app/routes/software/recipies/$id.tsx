@@ -2,15 +2,10 @@ import type {
   Ingredient as IngredientType,
   Recipie as RecipieType,
 } from "@prisma/client";
-import {
-  LoaderFunction,
-  useLoaderData,
-  json,
-  useCatch,
-  ErrorBoundaryComponent,
-} from "remix";
+import { LoaderFunction, ActionFunction, redirect } from "remix";
+import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
 import { Heading1, Heading2 } from "~/components/heading";
-import { ErrorSection, RecipieTime } from "~/components/lib";
+import { DeleteButton, ErrorSection, RecipieTime } from "~/components/lib";
 import * as Recipie from "~/model/recipie";
 
 type LoaderData = {
@@ -33,10 +28,15 @@ export const loader: LoaderFunction = async ({ params }) => {
   };
 };
 
+export const action: ActionFunction = async ({ params }) => {
+  const deleted = await Recipie.deleteRecipie(params.id);
+  return redirect("..");
+};
+
 export default function RecipieRoute() {
   const data = useLoaderData<LoaderData>();
   return (
-    <div>
+    <form method="post">
       <Heading1>{data.recipie.name}</Heading1>
       <RecipieTime totalTime={data.recipie.totalTime} />
       <hr className="my-4" />
@@ -50,7 +50,11 @@ export default function RecipieRoute() {
       </ul>
       <Heading2>Instructions</Heading2>
       <div>{data.recipie.instructions}</div>
-    </div>
+      <hr className="my-4" />
+      <div>
+        <DeleteButton>Delete this Recipie</DeleteButton>
+      </div>
+    </form>
   );
 }
 
