@@ -11,7 +11,7 @@ type PageTitleProps = {
 };
 
 export function PageTitle({ children }: PageTitleProps) {
-  return <h1 className="text-2xl font-bold mb-8">{children}</h1>;
+  return <h1 className="text-2xl font-bold mb-4">{children}</h1>;
 }
 
 function PageNavLink({
@@ -75,6 +75,21 @@ export function RecipieTime({ totalTime }: { totalTime: string }) {
     <div className="flex font-light text-gray-500">
       <TimeIcon />
       <p className="ml-1">{totalTime}</p>
+    </div>
+  );
+}
+
+export function ErrorSection({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <div className="text-white bg-red-400 rounded-md text-center h-full border-red-600 border-8 flex flex-col justify-center">
+      <h1 className="text-2xl mb-4">{title}</h1>
+      <p>{message}</p>
     </div>
   );
 }

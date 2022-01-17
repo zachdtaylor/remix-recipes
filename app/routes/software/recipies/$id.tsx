@@ -1,18 +1,35 @@
 import type { Ingredient, Recipie } from "@prisma/client";
-import { LoaderFunction, useLoaderData } from "remix";
+import {
+  LoaderFunction,
+  useLoaderData,
+  json,
+  useCatch,
+  ErrorBoundaryComponent,
+} from "remix";
 import { Heading1, Heading2 } from "~/components/heading";
-import { RecipieTime } from "~/components/lib";
+import { ErrorSection, RecipieTime } from "~/components/lib";
 import { db } from "~/utils/db";
 
 type LoaderData = {
   recipie: Recipie & { ingredients: Array<Ingredient> };
 };
 export const loader: LoaderFunction = async ({ params }) => {
+  const recipie = await db.recipie.findUnique({
+    where: { id: params.id },
+    include: { ingredients: true },
+  });
+  if (recipie === null) {
+    throw json(
+      {
+        message: `A recipie with id "${params.id}" does not exist.`,
+      },
+      {
+        status: 404,
+      }
+    );
+  }
   return {
-    recipie: await db.recipie.findUnique({
-      where: { id: params.id },
-      include: { ingredients: true },
-    }),
+    recipie,
   };
 };
 
@@ -36,3 +53,19 @@ export default function RecipieRoute() {
     </div>
   );
 }
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <ErrorSection title={caught.statusText} message={caught.data.message} />
+  );
+}
+
+export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
+  return (
+    <ErrorSection
+      title="An unexpected error occurred"
+      message={error.message}
+    />
+  );
+};

@@ -40,7 +40,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="text-gray-800 bg-gray-200">
+      <body className="text-gray-800">
         <div className="root-container md:flex md:h-screen">
           <nav className="flex shrink-0 w-full md:w-16 md:block">
             <AppNavLink to="/home">
@@ -64,7 +64,6 @@ export default function App() {
 
 export function CatchBoundary() {
   const caught = useCatch();
-  console.log(caught);
   return (
     <html>
       <head>
@@ -89,7 +88,25 @@ export function CatchBoundary() {
 }
 
 export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
-  return <div>{error.message}</div>;
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body className="bg-gray-100">
+        <div className="p-4">
+          <h1 className="text-2xl pb-3">An unexpected error occurred</h1>
+          <p className="mb-4">{error.message}</p>
+          <Link to="/" className="bg-primary text-white px-3 py-2 rounded-md">
+            Take me home
+          </Link>
+        </div>
+        <Scripts />
+      </body>
+    </html>
+  );
 };
 
 function AppNavLink({
