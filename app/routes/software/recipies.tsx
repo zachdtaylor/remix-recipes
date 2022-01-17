@@ -1,33 +1,26 @@
-import {
-  LoaderFunction,
-  Outlet,
-  Link,
-  useParams,
-  Form,
-  useLocation,
-} from "remix";
+import { Outlet, Link, useParams, useLocation, redirect } from "remix";
+import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
-import type { Recipie } from "@prisma/client";
-import { db } from "~/utils/db";
+import type { Recipie as RecipieType } from "@prisma/client";
+import * as Recipie from "~/model/recipie";
 import { RecipieCard } from "~/components/lib";
+import { PlusIcon } from "~/components/icons";
 
 type LoaderData = {
-  recipies: Array<Recipie>;
+  recipies: Array<RecipieType>;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   return {
-    recipies: await db.recipie.findMany({
-      where: {
-        name: {
-          contains: q || "",
-          mode: "insensitive",
-        },
-      },
-    }),
+    recipies: await Recipie.searchRecipies(q),
   };
+};
+
+export const action: ActionFunction = async () => {
+  const recipie = await Recipie.createNewRecipie();
+  return redirect(`recipies/${recipie.id}`);
 };
 
 export default function Recipies() {
@@ -41,7 +34,7 @@ export default function Recipies() {
           params.id ? "hidden" : ""
         } lg:block lg:w-1/3 lg:mr-8 overflow-auto`}
       >
-        <Form>
+        <form>
           <input
             className="w-full py-3 px-2 border-2 border-gray-300 rounded-md"
             type="text"
@@ -49,9 +42,16 @@ export default function Recipies() {
             placeholder="Search recipies"
             autoComplete="off"
           />
-        </Form>
+        </form>
         <ul>
-          {data.recipies.map((recipie) => (
+          <li className="my-4">
+            <form method="post" action="/software/recipies">
+              <button className="w-full shadow-md text-center text-white bg-primary py-2 rounded-md hover:bg-primary-light">
+                <PlusIcon /> Add New
+              </button>
+            </form>
+          </li>
+          {data?.recipies.map((recipie) => (
             <li className="my-4">
               <Link
                 key={recipie.id}

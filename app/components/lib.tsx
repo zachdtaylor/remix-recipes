@@ -63,7 +63,7 @@ type RecipieCardProps = {
 };
 export function RecipieCard({ title, totalTime }: RecipieCardProps) {
   return (
-    <div className="p-4 shadow-md">
+    <div className="p-4 shadow-md rounded-md hover:bg-gray-100">
       <h3 className="font-semibold mb-1">{title}</h3>
       <RecipieTime totalTime={totalTime} />
     </div>
@@ -87,7 +87,7 @@ export function ErrorSection({
   message: string;
 }) {
   return (
-    <div className="text-white bg-red-400 rounded-md text-center h-full border-red-600 border-8 flex flex-col justify-center">
+    <div className="text-white bg-red-400 rounded-md text-center h-full border-red-600 border-8 flex flex-col justify-center py-8">
       <h1 className="text-2xl mb-4">{title}</h1>
       <p>{message}</p>
     </div>

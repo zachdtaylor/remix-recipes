@@ -1,4 +1,7 @@
-import type { Ingredient, Recipie } from "@prisma/client";
+import type {
+  Ingredient as IngredientType,
+  Recipie as RecipieType,
+} from "@prisma/client";
 import {
   LoaderFunction,
   useLoaderData,
@@ -8,16 +11,13 @@ import {
 } from "remix";
 import { Heading1, Heading2 } from "~/components/heading";
 import { ErrorSection, RecipieTime } from "~/components/lib";
-import { db } from "~/utils/db";
+import * as Recipie from "~/model/recipie";
 
 type LoaderData = {
-  recipie: Recipie & { ingredients: Array<Ingredient> };
+  recipie: RecipieType & { ingredients: Array<IngredientType> };
 };
 export const loader: LoaderFunction = async ({ params }) => {
-  const recipie = await db.recipie.findUnique({
-    where: { id: params.id },
-    include: { ingredients: true },
-  });
+  const recipie = await Recipie.getRecipie(params.id);
   if (recipie === null) {
     throw json(
       {
