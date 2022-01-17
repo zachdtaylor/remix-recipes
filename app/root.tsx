@@ -40,7 +40,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="text-gray-800">
         <div className="root-container md:flex md:h-screen">
           <nav className="flex shrink-0 w-full md:w-16 md:block">
             <AppNavLink to="/home">

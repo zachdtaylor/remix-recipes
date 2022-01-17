@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "remix";
+import { TimeIcon } from "./icons";
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
   return <div className="px-4 pt-8 h-full flex flex-col">{children}</div>;
@@ -54,4 +55,26 @@ export function PageNav({ links }: PageNavProps) {
 
 export function PageContent({ children }: { children: React.ReactNode }) {
   return <div className="py-8 flex-grow overflow-auto">{children}</div>;
+}
+
+type RecipieCardProps = {
+  title: string;
+  totalTime: string;
+};
+export function RecipieCard({ title, totalTime }: RecipieCardProps) {
+  return (
+    <div className="p-4 shadow-md">
+      <h3 className="font-semibold mb-1">{title}</h3>
+      <RecipieTime totalTime={totalTime} />
+    </div>
+  );
+}
+
+export function RecipieTime({ totalTime }: { totalTime: string }) {
+  return (
+    <div className="flex font-light text-gray-600">
+      <TimeIcon />
+      <p className="ml-1">{totalTime}</p>
+    </div>
+  );
 }

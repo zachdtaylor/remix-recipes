@@ -9,7 +9,7 @@ import {
 import { useLoaderData } from "remix";
 import type { Recipie } from "@prisma/client";
 import { db } from "~/utils/db";
-import { ListCard } from "~/components/list";
+import { RecipieCard } from "~/components/lib";
 
 type LoaderData = {
   recipies: Array<Recipie>;
@@ -57,7 +57,10 @@ export default function Recipies() {
                 key={recipie.id}
                 to={{ pathname: recipie.id, search: location.search }}
               >
-                <ListCard title={recipie.name} />
+                <RecipieCard
+                  title={recipie.name}
+                  totalTime={recipie.totalTime}
+                />
               </Link>
             </li>
           ))}

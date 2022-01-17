@@ -1,6 +1,7 @@
 import type { Ingredient, Recipie } from "@prisma/client";
 import { LoaderFunction, useLoaderData } from "remix";
 import { Heading1, Heading2 } from "~/components/heading";
+import { RecipieTime } from "~/components/lib";
 import { db } from "~/utils/db";
 
 type LoaderData = {
@@ -20,6 +21,7 @@ export default function RecipieRoute() {
   return (
     <div>
       <Heading1>{data.recipie.name}</Heading1>
+      <RecipieTime totalTime={data.recipie.totalTime} />
       <hr className="my-4" />
       <Heading2>Ingredients</Heading2>
       <ul className="mb-4">
@@ -34,7 +36,3 @@ export default function RecipieRoute() {
     </div>
   );
 }
-
-export const handle = {
-  sup: "my guy",
-};

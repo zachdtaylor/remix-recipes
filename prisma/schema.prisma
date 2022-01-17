@@ -16,6 +16,7 @@ model Recipie {
   updatedAt    DateTime     @updatedAt
   name         String
   instructions String
+  totalTime    String
   ingredients  Ingredient[]
 }
 
