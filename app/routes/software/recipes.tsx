@@ -27,7 +27,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 };
 
 export const action: ActionFunction = async () => {
-  const recipe = await Recipe.createNewRecipe();
+  const recipe = await Recipe.createRecipe();
   return redirect(`recipes/${recipe.id}`);
 };
 

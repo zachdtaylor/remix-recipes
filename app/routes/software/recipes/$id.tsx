@@ -4,17 +4,15 @@ import type {
 } from "@prisma/client";
 import { LoaderFunction, ActionFunction, redirect } from "remix";
 import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
+import { TextInput } from "~/components/forms";
 import { Heading2 } from "~/components/heading";
-import { TimeIcon } from "~/components/icons";
-import {
-  DeleteButton,
-  ErrorSection,
-  PrimaryButton,
-  RecipeTime,
-} from "~/components/lib";
+import { PlusIcon, TimeIcon, TrashIcon } from "~/components/icons";
+import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
+import * as Ingredient from "~/model/ingredient";
 import { parseFormData } from "~/utils/http";
 import { classNames } from "~/utils/misc";
+import invariant from "tiny-invariant";
 
 type LoaderData = {
   recipe: RecipeType & { ingredients: Array<IngredientType> };
@@ -36,22 +34,48 @@ export const loader: LoaderFunction = async ({ params }) => {
   };
 };
 
+function saveRecipie(
+  id: string,
+  formData: { [key: string]: string | undefined }
+) {
+  const recipiePromise = Recipe.updateRecipe(id, {
+    name: formData.name,
+    totalTime: formData.totalTime,
+    instructions: formData.instructions,
+  });
+  const ingredientPromises = Object.keys(formData)
+    .filter((key) => key.split(".")[0] === "ingredient")
+    .map((key) => {
+      const [_, id, name] = key.split(".");
+      invariant(
+        name === "amount" || name === "name",
+        `invalid form input name ${key}`
+      );
+      return Ingredient.updateIngredient(id, { [name]: formData[key] });
+    });
+  return Promise.all([recipiePromise, ...ingredientPromises]);
+}
+
 export const action: ActionFunction = async ({ params, request }) => {
   const id = params.id;
   if (typeof id === "undefined") {
     return null;
   }
   const formData = await parseFormData(request);
+  console.log(formData);
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(id);
     return redirect("..");
   }
   if (formData._action === "save") {
-    return Recipe.updateRecipe(id, {
-      name: formData.name,
-      totalTime: formData.totalTime,
-      instructions: formData.instructions,
-    });
+    return saveRecipie(id, formData);
+  }
+  if (formData._action === "add-ingredient") {
+    return Ingredient.createIngredient(id);
+  }
+  if (formData._action?.includes("delete-ingredient")) {
+    const ingredientId = formData._action.split(".")[1];
+    return Ingredient.deleteIngredient(ingredientId);
   }
   return null;
 };
@@ -60,41 +84,47 @@ export default function RecipeRoute() {
   const data = useLoaderData<LoaderData>();
   return (
     <form method="post">
-      <input
-        type="text"
+      <TextInput
         name="name"
         placeholder="Recipie Name"
         defaultValue={data.recipe.name}
-        autoComplete="off"
-        className={classNames(
-          "text-2xl font-extrabold mb-2 outline-none w-full",
-          "border-b-2 border-b-white focus:border-b-primary"
-        )}
+        className="text-2xl font-extrabold mb-2 w-full"
       />
       <div className="flex font-light text-gray-500">
         <TimeIcon />
-        <input
-          type="text"
+        <TextInput
           name="totalTime"
           placeholder="Time"
-          autoComplete="off"
           defaultValue={data.recipe.totalTime}
-          className={classNames(
-            "ml-1 outline-none",
-            "border-b-2 border-b-white focus:border-b-primary"
-          )}
+          className="ml-1"
         />
       </div>
       <hr className="my-4" />
-      <Heading2>Ingredients</Heading2>
+      <div className="flex items-center mb-2">
+        <Heading2 className="mr-2">Ingredients</Heading2>
+        <button name="_action" value="add-ingredient" className="text-lg">
+          <PlusIcon />
+        </button>
+      </div>
       <ul className="mb-4">
         {data.recipe.ingredients.map((ingredient) => (
-          <li className="my-1">
-            {ingredient.amount} {ingredient.name}
+          <li className="my-1 flex flex-row">
+            <TextInput
+              name={`ingredient.${ingredient.id}.amount`}
+              defaultValue={ingredient.amount}
+            />
+            <TextInput
+              name={`ingredient.${ingredient.id}.name`}
+              defaultValue={ingredient.name}
+              className="ml-2 flex-grow"
+            />
+            <button name="_action" value={`delete-ingredient.${ingredient.id}`}>
+              <TrashIcon />
+            </button>
           </li>
         ))}
       </ul>
-      <Heading2>Instructions</Heading2>
+      <Heading2 className="mb-2">Instructions</Heading2>
       <textarea
         name="instructions"
         placeholder="Instructions"

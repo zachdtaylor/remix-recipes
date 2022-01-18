@@ -1,7 +1,7 @@
 import { Recipe } from "@prisma/client";
 import { db } from "~/utils/db";
 
-export function createNewRecipe() {
+export function createRecipe() {
   return db.recipe.create({
     data: {
       name: "New Recipe",
@@ -26,7 +26,13 @@ export function updateRecipe(id: string, data: Partial<Recipe>) {
 export function getRecipe(id?: string) {
   return db.recipe.findUnique({
     where: { id: id },
-    include: { ingredients: true },
+    include: {
+      ingredients: {
+        orderBy: {
+          createdAt: "asc",
+        },
+      },
+    },
   });
 }
 
