@@ -8,30 +8,30 @@ import {
 } from "remix";
 import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
-import type { Recipie as RecipieType } from "@prisma/client";
-import * as Recipie from "~/model/recipie";
-import { PrimaryButton, RecipieCard } from "~/components/lib";
+import type { Recipe as RecipeType } from "@prisma/client";
+import * as Recipe from "~/model/recipe";
+import { PrimaryButton, RecipeCard } from "~/components/lib";
 import { PlusIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
 
 type LoaderData = {
-  recipies: Array<RecipieType>;
+  recipes: Array<RecipeType>;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   return {
-    recipies: await Recipie.searchRecipies(q),
+    recipes: await Recipe.searchRecipes(q),
   };
 };
 
 export const action: ActionFunction = async () => {
-  const recipie = await Recipie.createNewRecipie();
-  return redirect(`recipies/${recipie.id}`);
+  const recipe = await Recipe.createNewRecipe();
+  return redirect(`recipes/${recipe.id}`);
 };
 
-export default function Recipies() {
+export default function Recipes() {
   const data = useLoaderData<LoaderData>();
   const params = useParams();
   const location = useLocation();
@@ -49,29 +49,29 @@ export default function Recipies() {
             className="w-full py-3 px-2 border-2 border-gray-300 rounded-md"
             type="text"
             name="q"
-            placeholder="Search recipies"
+            placeholder="Search recipes"
             defaultValue={searchParams.get("q") || ""}
             autoComplete="off"
           />
         </form>
         <ul>
           <li className="my-4">
-            <form method="post" action="/software/recipies">
+            <form method="post" action="/software/recipes">
               <PrimaryButton className="w-full">
                 <PlusIcon /> Add New
               </PrimaryButton>
             </form>
           </li>
-          {data?.recipies.map((recipie) => (
+          {data?.recipes.map((recipe) => (
             <li className="my-4">
               <NavLink
-                key={recipie.id}
-                to={{ pathname: recipie.id, search: location.search }}
+                key={recipe.id}
+                to={{ pathname: recipe.id, search: location.search }}
               >
                 {({ isActive }) => (
-                  <RecipieCard
-                    title={recipie.name}
-                    totalTime={recipie.totalTime}
+                  <RecipeCard
+                    title={recipe.name}
+                    totalTime={recipe.totalTime}
                     isActive={isActive}
                   />
                 )}

@@ -3,13 +3,13 @@ const db = new PrismaClient();
 
 async function seed() {
   await Promise.all(
-    getRecipies().map((recipie) => db.recipie.create({ data: recipie }))
+    getRecipes().map((recipe) => db.recipe.create({ data: recipe }))
   );
 }
 
 seed();
 
-function getRecipies() {
+function getRecipes() {
   return [
     {
       name: "Beef Enchiladas",

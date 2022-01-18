@@ -28,7 +28,7 @@ export const links: LinksFunction = () => {
 };
 
 export const meta: MetaFunction = () => {
-  return { title: "Remix Recipies" };
+  return { title: "Remix Recipes" };
 };
 
 export default function App() {

@@ -60,12 +60,12 @@ export function PageContent({ children }: { children: React.ReactNode }) {
   return <div className="py-8 flex-grow overflow-auto">{children}</div>;
 }
 
-type RecipieCardProps = {
+type RecipeCardProps = {
   title: string;
   totalTime: string;
   isActive: boolean;
 };
-export function RecipieCard({ title, totalTime, isActive }: RecipieCardProps) {
+export function RecipeCard({ title, totalTime, isActive }: RecipeCardProps) {
   return (
     <div
       className={classNames(
@@ -76,7 +76,7 @@ export function RecipieCard({ title, totalTime, isActive }: RecipieCardProps) {
       )}
     >
       <h3 className="font-semibold mb-1">{title}</h3>
-      <RecipieTime
+      <RecipeTime
         totalTime={totalTime}
         className={classNames(
           "group-hover:text-primary-light",
@@ -87,11 +87,11 @@ export function RecipieCard({ title, totalTime, isActive }: RecipieCardProps) {
   );
 }
 
-type RecipieTimeProps = {
+type RecipeTimeProps = {
   totalTime: string;
   className?: string;
 };
-export function RecipieTime({ totalTime, className }: RecipieTimeProps) {
+export function RecipeTime({ totalTime, className }: RecipeTimeProps) {
   return (
     <div className={classNames("flex font-light text-gray-500", className)}>
       <TimeIcon />
@@ -123,10 +123,14 @@ export function ErrorSection({
 type ButtonProps = {
   children: React.ReactNode;
   className?: string;
+  type?: "submit" | "button" | "reset";
+  name?: string;
+  value?: string;
 };
-function Button({ children, className }: ButtonProps) {
+function Button({ children, className, ...props }: ButtonProps) {
   return (
     <button
+      {...props}
       className={classNames("px-3 py-2 rounded-md text-center", className)}
     >
       {children}
@@ -134,9 +138,10 @@ function Button({ children, className }: ButtonProps) {
   );
 }
 
-export function DeleteButton({ children, className }: ButtonProps) {
+export function DeleteButton({ children, className, ...props }: ButtonProps) {
   return (
     <Button
+      {...props}
       className={classNames(
         "border-2 text-red-600 border-red-600",
         "hover:bg-red-600 hover:text-white",
@@ -148,9 +153,10 @@ export function DeleteButton({ children, className }: ButtonProps) {
   );
 }
 
-export function PrimaryButton({ children, className }: ButtonProps) {
+export function PrimaryButton({ children, className, ...props }: ButtonProps) {
   return (
     <Button
+      {...props}
       className={classNames(
         "text-white bg-primary hover:bg-primary-light",
         className

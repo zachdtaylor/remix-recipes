@@ -10,7 +10,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Recipie {
+model Recipe {
   id           String       @id @default(uuid())
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
@@ -26,6 +26,6 @@ model Ingredient {
   updatedAt DateTime @updatedAt
   name      String
   amount    String
-  recipieId String
-  recipie   Recipie  @relation(fields: [recipieId], references: [id], onDelete: Cascade)
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
