@@ -39,7 +39,7 @@ export function searchRecipes(query: string | null) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      updatedAt: "desc",
     },
   });
 }

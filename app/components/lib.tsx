@@ -80,7 +80,7 @@ export function RecipeCard({ title, totalTime, isActive }: RecipeCardProps) {
         totalTime={totalTime}
         className={classNames(
           "group-hover:text-primary-light",
-          isActive ? "text-primary-light" : ""
+          isActive ? "text-primary-light" : "text-gray-500"
         )}
       />
     </div>
@@ -93,7 +93,7 @@ type RecipeTimeProps = {
 };
 export function RecipeTime({ totalTime, className }: RecipeTimeProps) {
   return (
-    <div className={classNames("flex font-light text-gray-500", className)}>
+    <div className={classNames("flex font-light", className)}>
       <TimeIcon />
       <p className="ml-1">{totalTime}</p>
     </div>

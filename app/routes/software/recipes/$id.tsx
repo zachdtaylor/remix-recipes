@@ -4,7 +4,8 @@ import type {
 } from "@prisma/client";
 import { LoaderFunction, ActionFunction, redirect } from "remix";
 import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
-import { Heading1, Heading2 } from "~/components/heading";
+import { Heading2 } from "~/components/heading";
+import { TimeIcon } from "~/components/icons";
 import {
   DeleteButton,
   ErrorSection,
@@ -16,14 +17,14 @@ import { parseFormData } from "~/utils/http";
 import { classNames } from "~/utils/misc";
 
 type LoaderData = {
-  recipie: RecipeType & { ingredients: Array<IngredientType> };
+  recipe: RecipeType & { ingredients: Array<IngredientType> };
 };
 export const loader: LoaderFunction = async ({ params }) => {
-  const recipie = await Recipe.getRecipe(params.id);
-  if (recipie === null) {
+  const recipe = await Recipe.getRecipe(params.id);
+  if (recipe === null) {
     throw json(
       {
-        message: `A recipie with id "${params.id}" does not exist.`,
+        message: `A recipe with id "${params.id}" does not exist.`,
       },
       {
         status: 404,
@@ -31,7 +32,7 @@ export const loader: LoaderFunction = async ({ params }) => {
     );
   }
   return {
-    recipie,
+    recipe,
   };
 };
 
@@ -48,6 +49,8 @@ export const action: ActionFunction = async ({ params, request }) => {
   if (formData._action === "save") {
     return Recipe.updateRecipe(id, {
       name: formData.name,
+      totalTime: formData.totalTime,
+      instructions: formData.instructions,
     });
   }
   return null;
@@ -60,25 +63,48 @@ export default function RecipeRoute() {
       <input
         type="text"
         name="name"
-        defaultValue={data.recipie.name}
+        placeholder="Recipie Name"
+        defaultValue={data.recipe.name}
         autoComplete="off"
         className={classNames(
           "text-2xl font-extrabold mb-2 outline-none w-full",
           "border-b-2 border-b-white focus:border-b-primary"
         )}
       />
-      <RecipeTime totalTime={data.recipie.totalTime} />
+      <div className="flex font-light text-gray-500">
+        <TimeIcon />
+        <input
+          type="text"
+          name="totalTime"
+          placeholder="Time"
+          autoComplete="off"
+          defaultValue={data.recipe.totalTime}
+          className={classNames(
+            "ml-1 outline-none",
+            "border-b-2 border-b-white focus:border-b-primary"
+          )}
+        />
+      </div>
       <hr className="my-4" />
       <Heading2>Ingredients</Heading2>
       <ul className="mb-4">
-        {data.recipie.ingredients.map((ingredient) => (
+        {data.recipe.ingredients.map((ingredient) => (
           <li className="my-1">
             {ingredient.amount} {ingredient.name}
           </li>
         ))}
       </ul>
       <Heading2>Instructions</Heading2>
-      <div>{data.recipie.instructions}</div>
+      <textarea
+        name="instructions"
+        placeholder="Instructions"
+        defaultValue={data.recipe.instructions}
+        className={classNames(
+          "w-full h-56 outline-none rounded-md",
+          "border-2 border-white focus:border-primary",
+          "focus:p-3 transition-all duration-300"
+        )}
+      />
       <hr className="my-4" />
       <div className="flex justify-between">
         <PrimaryButton name="_action" value="save">
