@@ -1,4 +1,11 @@
-import { Outlet, NavLink, useParams, useLocation, redirect } from "remix";
+import {
+  Outlet,
+  NavLink,
+  useParams,
+  useLocation,
+  redirect,
+  useSearchParams,
+} from "remix";
 import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipie as RecipieType } from "@prisma/client";
@@ -28,6 +35,7 @@ export default function Recipies() {
   const data = useLoaderData<LoaderData>();
   const params = useParams();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   return (
     <div className="lg:flex h-full">
       <div
@@ -42,6 +50,7 @@ export default function Recipies() {
             type="text"
             name="q"
             placeholder="Search recipies"
+            defaultValue={searchParams.get("q") || ""}
             autoComplete="off"
           />
         </form>
