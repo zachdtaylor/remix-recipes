@@ -63,19 +63,37 @@ export function PageContent({ children }: { children: React.ReactNode }) {
 type RecipieCardProps = {
   title: string;
   totalTime: string;
+  isActive: boolean;
 };
-export function RecipieCard({ title, totalTime }: RecipieCardProps) {
+export function RecipieCard({ title, totalTime, isActive }: RecipieCardProps) {
   return (
-    <div className="p-4 shadow-md rounded-md hover:bg-gray-100">
+    <div
+      className={classNames(
+        "group",
+        "p-4 shadow-md rounded-md border-2 border-white",
+        "hover:text-primary hover:border-primary",
+        isActive ? "border-primary text-primary" : ""
+      )}
+    >
       <h3 className="font-semibold mb-1">{title}</h3>
-      <RecipieTime totalTime={totalTime} />
+      <RecipieTime
+        totalTime={totalTime}
+        className={classNames(
+          "group-hover:text-primary-light",
+          isActive ? "text-primary-light" : ""
+        )}
+      />
     </div>
   );
 }
 
-export function RecipieTime({ totalTime }: { totalTime: string }) {
+type RecipieTimeProps = {
+  totalTime: string;
+  className?: string;
+};
+export function RecipieTime({ totalTime, className }: RecipieTimeProps) {
   return (
-    <div className="flex font-light text-gray-500">
+    <div className={classNames("flex font-light text-gray-500", className)}>
       <TimeIcon />
       <p className="ml-1">{totalTime}</p>
     </div>

@@ -28,6 +28,9 @@ export function searchRecipies(query: string | null) {
         mode: "insensitive",
       },
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 }
 

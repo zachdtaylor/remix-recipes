@@ -1,10 +1,11 @@
-import { Outlet, Link, useParams, useLocation, redirect } from "remix";
+import { Outlet, NavLink, useParams, useLocation, redirect } from "remix";
 import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipie as RecipieType } from "@prisma/client";
 import * as Recipie from "~/model/recipie";
 import { PrimaryButton, RecipieCard } from "~/components/lib";
 import { PlusIcon } from "~/components/icons";
+import { classNames } from "~/utils/misc";
 
 type LoaderData = {
   recipies: Array<RecipieType>;
@@ -30,9 +31,10 @@ export default function Recipies() {
   return (
     <div className="lg:flex h-full">
       <div
-        className={`${
+        className={classNames(
+          "lg:block lg:w-1/3 lg:pr-8 overflow-auto",
           params.id ? "hidden" : ""
-        } lg:block lg:w-1/3 lg:mr-8 overflow-auto`}
+        )}
       >
         <form>
           <input
@@ -53,15 +55,18 @@ export default function Recipies() {
           </li>
           {data?.recipies.map((recipie) => (
             <li className="my-4">
-              <Link
+              <NavLink
                 key={recipie.id}
                 to={{ pathname: recipie.id, search: location.search }}
               >
-                <RecipieCard
-                  title={recipie.name}
-                  totalTime={recipie.totalTime}
-                />
-              </Link>
+                {({ isActive }) => (
+                  <RecipieCard
+                    title={recipie.name}
+                    totalTime={recipie.totalTime}
+                    isActive={isActive}
+                  />
+                )}
+              </NavLink>
             </li>
           ))}
         </ul>
