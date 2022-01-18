@@ -1,5 +1,6 @@
 import React from "react";
 import { NavLink } from "remix";
+import { classNames } from "~/utils/misc";
 import { TimeIcon } from "./icons";
 
 export function PageWrapper({ children }: { children: React.ReactNode }) {
@@ -27,9 +28,11 @@ function PageNavLink({
     <NavLink
       to={to}
       className={({ isActive }) =>
-        (className || "") +
-        (isActive ? " border-b-2 border-b-primary" : "") +
-        " pb-2.5 px-2"
+        classNames(
+          "pb-2.5 px-2",
+          isActive ? " border-b-2 border-b-primary" : "",
+          className
+        )
       }
     >
       {children}
@@ -87,17 +90,55 @@ export function ErrorSection({
   message: string;
 }) {
   return (
-    <div className="text-white bg-red-400 rounded-md text-center h-full border-red-600 border-8 flex flex-col justify-center py-8">
+    <div
+      className={classNames(
+        "text-white bg-red-400 rounded-md text-center",
+        "h-full border-red-600 border-8 flex flex-col justify-center py-8"
+      )}
+    >
       <h1 className="text-2xl mb-4">{title}</h1>
       <p>{message}</p>
     </div>
   );
 }
 
-export function DeleteButton({ children }: { children: React.ReactNode }) {
+type ButtonProps = {
+  children: React.ReactNode;
+  className?: string;
+};
+function Button({ children, className }: ButtonProps) {
   return (
-    <button className="px-3 py-2 rounded-md border-2 text-red-600 border-red-600 hover:bg-red-600 hover:text-white">
+    <button
+      className={classNames("px-3 py-2 rounded-md text-center", className)}
+    >
       {children}
     </button>
+  );
+}
+
+export function DeleteButton({ children, className }: ButtonProps) {
+  return (
+    <Button
+      className={classNames(
+        "border-2 text-red-600 border-red-600",
+        "hover:bg-red-600 hover:text-white",
+        className
+      )}
+    >
+      {children}
+    </Button>
+  );
+}
+
+export function PrimaryButton({ children, className }: ButtonProps) {
+  return (
+    <Button
+      className={classNames(
+        "text-white bg-primary hover:bg-primary-light",
+        className
+      )}
+    >
+      {children}
+    </Button>
   );
 }

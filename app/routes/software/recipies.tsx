@@ -3,7 +3,7 @@ import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipie as RecipieType } from "@prisma/client";
 import * as Recipie from "~/model/recipie";
-import { RecipieCard } from "~/components/lib";
+import { PrimaryButton, RecipieCard } from "~/components/lib";
 import { PlusIcon } from "~/components/icons";
 
 type LoaderData = {
@@ -46,9 +46,9 @@ export default function Recipies() {
         <ul>
           <li className="my-4">
             <form method="post" action="/software/recipies">
-              <button className="w-full shadow-md text-center text-white bg-primary py-2 rounded-md hover:bg-primary-light">
+              <PrimaryButton className="w-full">
                 <PlusIcon /> Add New
-              </button>
+              </PrimaryButton>
             </form>
           </li>
           {data?.recipies.map((recipie) => (
