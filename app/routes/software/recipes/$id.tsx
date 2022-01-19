@@ -63,7 +63,6 @@ export const action: ActionFunction = async ({ params, request }) => {
     return null;
   }
   const formData = await parseRecipieFormData(request);
-  console.log(formData);
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(id);
     return redirect("..");
@@ -101,7 +100,6 @@ export default function RecipeRoute() {
             className="ml-1"
           />
         </div>
-        <input type="file" name="image" size={80} />
       </div>
       <hr className="my-4" />
       <div className="flex items-center mb-2">
