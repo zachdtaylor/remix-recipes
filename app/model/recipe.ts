@@ -29,7 +29,7 @@ export function getRecipe(id?: string) {
     include: {
       ingredients: {
         orderBy: {
-          createdAt: "asc",
+          createdAt: "desc",
         },
       },
     },
