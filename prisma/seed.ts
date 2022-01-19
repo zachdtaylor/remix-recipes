@@ -14,6 +14,7 @@ function getRecipes() {
     {
       name: "Beef Enchiladas",
       totalTime: "20 min",
+      image: "",
       instructions:
         "Cook taco meat and add refried beans and chilies. In a separate container, combine enchilada sauce and soup. Dip tortillas in enchilada mixture and fill with beef mixture and grated cheese. Arrange tortillas in shallow baking dish and pour remaining enchilada sauce on top. Sprinkle with remaining cheese and bake at 350 for 25-30 minutes.",
       ingredients: {
@@ -31,6 +32,7 @@ function getRecipes() {
     {
       name: "Buttermilk Pancakes",
       totalTime: "15 min",
+      image: "",
       instructions:
         "Whisk together salt, baking powder, baking soda, four and sugar. In a separate bowl, combine eggs and butermilk and drizzle in butter. With wooden spoon, combine wet and dry ingredients until just moistened.",
       ingredients: {
@@ -49,6 +51,7 @@ function getRecipes() {
     {
       name: "French Dip Sandwiches",
       totalTime: "4-10 hrs (crockpot)",
+      image: "",
       instructions:
         "Place roast in slow cooker and sprinkle onion soup mix over the roast. Add water and beef broth. Cook on high for 4-6 hours or low for 8-10. Serve on rolls with swiss cheese.",
       ingredients: {
@@ -65,6 +68,7 @@ function getRecipes() {
     {
       name: "Shepherds Pie",
       totalTime: "40 min",
+      image: "",
       instructions:
         "Brown ground beef with onion. Add brown sugar, vinegar, tomato soup and mustard. Pour into baking dish and top with mashed potatoes. Sprinkle with grated cheese and bake at 350 for 30 minutes.",
       ingredients: {
@@ -83,6 +87,7 @@ function getRecipes() {
     {
       name: "Chicken Alfredo",
       totalTime: "90 min",
+      image: "",
       instructions:
         "Melt butter in large pan. Add garlic and cook for 30 seconds. Whisk in flour and stir for another 30 seconds. Add cream cheese and stir until it starts to melt down. Pour in cream and parmesean and whisk until cream cheese is incorporated. Once the sauce has thickened, season with salt and pepper.\n\nCut chicken into thin pieces. In a shallow dish combine flour, 1 tsp salt and 1 tsp pepper. In another dish beat eggs. In a third dish combine bread crumbs and parmesean. Working with one piece at a time, dredge in flour, then egg, then bread crumb/parmesean mixture. Cover and place in a baking dish and bake at 350 for 50-60 minutes.\n\n(Sausage can also be added to this alfredo for a variation)",
       ingredients: {
@@ -106,6 +111,7 @@ function getRecipes() {
     {
       name: "Chicken Enchiladas",
       totalTime: "35 min",
+      image: "",
       instructions:
         "Combine soup and sour cream. Heat butter, onion and chili powder. Cook until tender and add chicken, chilis and 2 tbsp sour mixture. Spread 1/2 of soup mixture into shallow pan. Fill tortillas with chicken mixture and place into pan. Spread remaining soup onto top and sprinkle with cheese. Bake at 350 for 26 minutes.",
       ingredients: {

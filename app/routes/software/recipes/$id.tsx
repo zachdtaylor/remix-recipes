@@ -10,7 +10,7 @@ import { PlusIcon, TimeIcon, TrashIcon } from "~/components/icons";
 import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
-import { parseFormData } from "~/utils/http";
+import { parseRecipieFormData } from "~/utils/http";
 import { classNames } from "~/utils/misc";
 import invariant from "tiny-invariant";
 
@@ -42,6 +42,7 @@ function saveRecipie(
     name: formData.name,
     totalTime: formData.totalTime,
     instructions: formData.instructions,
+    image: formData.image,
   });
   const ingredientPromises = Object.keys(formData)
     .filter((key) => key.split(".")[0] === "ingredient")
@@ -61,7 +62,7 @@ export const action: ActionFunction = async ({ params, request }) => {
   if (typeof id === "undefined") {
     return null;
   }
-  const formData = await parseFormData(request);
+  const formData = await parseRecipieFormData(request);
   console.log(formData);
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(id);
@@ -91,7 +92,7 @@ export default function RecipeRoute() {
         className="text-2xl font-extrabold mb-2 w-full"
       />
       <div className="flex justify-between">
-        <div className="flex font-light text-gray-500">
+        <div className="flex font-light text-gray-500 items-center">
           <TimeIcon />
           <TextInput
             name="totalTime"
@@ -100,6 +101,7 @@ export default function RecipeRoute() {
             className="ml-1"
           />
         </div>
+        <input type="file" name="image" size={80} />
       </div>
       <hr className="my-4" />
       <div className="flex items-center mb-2">
@@ -118,7 +120,7 @@ export default function RecipeRoute() {
         </thead>
         <tbody>
           {data.recipe.ingredients.map((ingredient) => (
-            <tr>
+            <tr key={ingredient.id}>
               <td className="pr-4">
                 <TextInput
                   name={`ingredient.${ingredient.id}.amount`}

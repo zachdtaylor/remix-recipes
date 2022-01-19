@@ -17,6 +17,7 @@ model Recipe {
   name         String
   instructions String
   totalTime    String
+  image        String
   ingredients  Ingredient[]
 }
 

@@ -166,3 +166,21 @@ export function PrimaryButton({ children, className, ...props }: ButtonProps) {
     </Button>
   );
 }
+
+export function SecondaryButton({
+  children,
+  className,
+  ...props
+}: ButtonProps) {
+  return (
+    <Button
+      {...props}
+      className={classNames(
+        "border-2 border-primary text-primary px-3 py-2 cursor-pointer",
+        "hover:bg-primary hover:text-white rounded-md"
+      )}
+    >
+      {children}
+    </Button>
+  );
+}
