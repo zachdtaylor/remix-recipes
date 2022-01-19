@@ -103,5 +103,24 @@ function getRecipes() {
         ],
       },
     },
+    {
+      name: "Chicken Enchiladas",
+      totalTime: "35 min",
+      instructions:
+        "Combine soup and sour cream. Heat butter, onion and chili powder. Cook until tender and add chicken, chilis and 2 tbsp sour mixture. Spread 1/2 of soup mixture into shallow pan. Fill tortillas with chicken mixture and place into pan. Spread remaining soup onto top and sprinkle with cheese. Bake at 350 for 26 minutes.",
+      ingredients: {
+        create: [
+          { amount: "1 can", name: "cream of chicken soup" },
+          { amount: "1/2 cup", name: "sour cream" },
+          { amount: "1 tbsp", name: "butter" },
+          { amount: "1", name: "medium onion" },
+          { amount: "1 tsp", name: "chili powder" },
+          { amount: "2 cups", name: "chopped chicken" },
+          { amount: "1 can", name: "green chilis" },
+          { amount: "8", name: "flour tortillas" },
+          { amount: "1 cup", name: "shredded cheddar cheese" },
+        ],
+      },
+    },
   ];
 }
