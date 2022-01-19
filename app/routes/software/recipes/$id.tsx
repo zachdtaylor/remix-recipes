@@ -90,14 +90,16 @@ export default function RecipeRoute() {
         defaultValue={data.recipe.name}
         className="text-2xl font-extrabold mb-2 w-full"
       />
-      <div className="flex font-light text-gray-500">
-        <TimeIcon />
-        <TextInput
-          name="totalTime"
-          placeholder="Time"
-          defaultValue={data.recipe.totalTime}
-          className="ml-1"
-        />
+      <div className="flex justify-between">
+        <div className="flex font-light text-gray-500">
+          <TimeIcon />
+          <TextInput
+            name="totalTime"
+            placeholder="Time"
+            defaultValue={data.recipe.totalTime}
+            className="ml-1"
+          />
+        </div>
       </div>
       <hr className="my-4" />
       <div className="flex items-center mb-2">
@@ -106,24 +108,43 @@ export default function RecipeRoute() {
           <PlusIcon />
         </button>
       </div>
-      <ul className="mb-4">
-        {data.recipe.ingredients.map((ingredient) => (
-          <li className="my-1 flex flex-row">
-            <TextInput
-              name={`ingredient.${ingredient.id}.amount`}
-              defaultValue={ingredient.amount}
-            />
-            <TextInput
-              name={`ingredient.${ingredient.id}.name`}
-              defaultValue={ingredient.name}
-              className="ml-2 flex-grow"
-            />
-            <button name="_action" value={`delete-ingredient.${ingredient.id}`}>
-              <TrashIcon />
-            </button>
-          </li>
-        ))}
-      </ul>
+      <table className="mb-4 w-full">
+        <thead>
+          <tr>
+            <th className="text-left w-1/3 pr-4">Amount</th>
+            <th className="text-left">Name</th>
+            <th className="w-4"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.recipe.ingredients.map((ingredient) => (
+            <tr>
+              <td className="pr-4">
+                <TextInput
+                  name={`ingredient.${ingredient.id}.amount`}
+                  defaultValue={ingredient.amount}
+                  className="w-full"
+                />
+              </td>
+              <td className="pr-4">
+                <TextInput
+                  name={`ingredient.${ingredient.id}.name`}
+                  defaultValue={ingredient.name}
+                  className="w-full"
+                />
+              </td>
+              <td className="text-right">
+                <button
+                  name="_action"
+                  value={`delete-ingredient.${ingredient.id}`}
+                >
+                  <TrashIcon />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <Heading2 className="mb-2">Instructions</Heading2>
       <textarea
         name="instructions"

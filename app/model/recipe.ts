@@ -8,7 +8,7 @@ export function createRecipe() {
       totalTime: "0 min",
       instructions: "How do you make this recipe?",
       ingredients: {
-        create: [{ amount: "a spoonful of", name: "sugar" }],
+        create: [{ amount: "a spoonful", name: "sugar" }],
       },
     },
   });

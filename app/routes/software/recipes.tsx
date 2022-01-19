@@ -81,7 +81,7 @@ export default function Recipes() {
         </ul>
         <br />
       </div>
-      <div className="lg:w-2/3 overflow-auto">
+      <div className="lg:w-2/3 overflow-auto pr-4">
         <Outlet />
       </div>
     </div>
