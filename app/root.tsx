@@ -11,7 +11,7 @@ import {
   ErrorBoundaryComponent,
 } from "remix";
 import type { MetaFunction, LinksFunction } from "remix";
-import { BookIcon, HomeIcon } from "~/components/icons";
+import { BookIcon, HomeIcon, LoginIcon } from "~/components/icons";
 import tailwindStyles from "./tailwind.css";
 import theme from "./styles/theme.css";
 import sharedStyles from "./styles/shared.css";
@@ -42,13 +42,20 @@ export default function App() {
       </head>
       <body className="text-gray-800">
         <div className="root-container md:flex md:h-screen">
-          <nav className="flex shrink-0 w-full md:w-16 md:block">
-            <AppNavLink to="/home">
-              <HomeIcon />
-            </AppNavLink>
-            <AppNavLink to="/software">
-              <BookIcon />
-            </AppNavLink>
+          <nav className="flex justify-between shrink-0 w-full md:flex-col md:w-16">
+            <ul className="flex md:flex-col">
+              <AppNavLink to="/home">
+                <HomeIcon />
+              </AppNavLink>
+              <AppNavLink to="/software">
+                <BookIcon />
+              </AppNavLink>
+            </ul>
+            <ul>
+              <AppNavLink to="/login">
+                <LoginIcon />
+              </AppNavLink>
+            </ul>
           </nav>
           <div className="flex-grow">
             <Outlet />
@@ -76,7 +83,7 @@ export function CatchBoundary() {
           <h1 className="text-2xl pb-3">
             {caught.status} {caught.statusText}
           </h1>
-          <p className="mb-4">{caught.data.message}</p>
+          <p className="mb-4">{caught.data?.message}</p>
           <Link to="/" className="bg-primary text-white px-3 py-2 rounded-md">
             Take me home
           </Link>
@@ -115,12 +122,14 @@ function AppNavLink({
   children: React.ReactNode;
 }) {
   return (
-    <NavLink to={to} className="w-16">
-      {({ isActive }) => (
-        <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
-          {children}
-        </div>
-      )}
-    </NavLink>
+    <li className="w-16">
+      <NavLink to={to} className="w-16">
+        {({ isActive }) => (
+          <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
+            {children}
+          </div>
+        )}
+      </NavLink>
+    </li>
   );
 }
