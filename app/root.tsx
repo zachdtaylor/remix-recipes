@@ -9,14 +9,16 @@ import {
   ScrollRestoration,
   useCatch,
   ErrorBoundaryComponent,
+  useLoaderData,
 } from "remix";
-import type { MetaFunction, LinksFunction } from "remix";
-import { BookIcon, HomeIcon, LoginIcon } from "~/components/icons";
+import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
+import { BookIcon, HomeIcon, LoginIcon, LogoutIcon } from "~/components/icons";
 import tailwindStyles from "./tailwind.css";
 import theme from "./styles/theme.css";
 import sharedStyles from "./styles/shared.css";
 import styles from "./styles/root.css";
 import React from "react";
+import { getSessionUserId } from "./utils/auth.server";
 
 export const links: LinksFunction = () => {
   return [
@@ -31,7 +33,13 @@ export const meta: MetaFunction = () => {
   return { title: "Remix Recipes" };
 };
 
+export const loader: LoaderFunction = async ({ request }) => {
+  const userId = await getSessionUserId(request);
+  return userId;
+};
+
 export default function App() {
+  const userId = useLoaderData();
   return (
     <html lang="en">
       <head>
@@ -47,14 +55,22 @@ export default function App() {
               <AppNavLink to="/home">
                 <HomeIcon />
               </AppNavLink>
-              <AppNavLink to="/software">
-                <BookIcon />
-              </AppNavLink>
+              {userId ? (
+                <AppNavLink to="/software">
+                  <BookIcon />
+                </AppNavLink>
+              ) : null}
             </ul>
             <ul>
-              <AppNavLink to="/login">
-                <LoginIcon />
-              </AppNavLink>
+              {!userId ? (
+                <AppNavLink to="/login">
+                  <LoginIcon />
+                </AppNavLink>
+              ) : (
+                <AppNavLink to="/logout">
+                  <LogoutIcon />
+                </AppNavLink>
+              )}
             </ul>
           </nav>
           <div className="flex-grow">
