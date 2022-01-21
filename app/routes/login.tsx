@@ -7,7 +7,7 @@ import {
 } from "remix";
 import { EmailInput } from "~/components/forms";
 import { PrimaryButton } from "~/components/lib";
-import { getSessionUserId } from "~/utils/auth.server";
+import { generateMagicLink, getSessionUserId } from "~/utils/auth.server";
 import { isValidEmail } from "~/utils/validation";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -30,15 +30,19 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  return json({ ok: true });
+  const link = generateMagicLink(email);
+
+  return json({ link });
 };
 
 export default function Login() {
   const actionData = useActionData();
   return (
-    <div className="h-full text-center flex flex-col">
-      {actionData?.ok ? (
-        <div className="mt-36">Success!</div>
+    <div className="h-full text-center">
+      {actionData?.link ? (
+        <div className="mt-36">
+          <a href={actionData.link}>I'm magic</a>
+        </div>
       ) : (
         <div className="mt-36">
           <h1 className="text-3xl my-8">Remix Recipies</h1>
