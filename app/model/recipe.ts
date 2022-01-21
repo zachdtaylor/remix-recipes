@@ -1,9 +1,10 @@
 import { Recipe } from "@prisma/client";
 import { db } from "~/utils/db";
 
-export function createRecipe() {
+export function createRecipe(userId: string) {
   return db.recipe.create({
     data: {
+      userId,
       name: "New Recipe",
       totalTime: "0 min",
       image: "",
@@ -37,9 +38,10 @@ export function getRecipe(id?: string) {
   });
 }
 
-export function searchRecipes(query: string | null) {
+export function searchRecipes(userId: string, query: string | null) {
   return db.recipe.findMany({
     where: {
+      userId,
       name: {
         contains: query || "",
         mode: "insensitive",

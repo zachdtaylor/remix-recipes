@@ -19,6 +19,8 @@ model Recipe {
   totalTime    String
   image        String
   ingredients  Ingredient[]
+  userId       String
+  user         User         @relation(fields: [userId], references: [id])
 }
 
 model Ingredient {
@@ -29,4 +31,12 @@ model Ingredient {
   amount    String
   recipeId  String
   recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  firstName String
+  lastName  String
+  recipes   Recipe[]
 }

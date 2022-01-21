@@ -2,16 +2,26 @@ import { PrismaClient } from "@prisma/client";
 const db = new PrismaClient();
 
 async function seed() {
+  const user = await db.user.create({ data: getUser() });
   await Promise.all(
-    getRecipes().map((recipe) => db.recipe.create({ data: recipe }))
+    getRecipes(user.id).map((recipe) => db.recipe.create({ data: recipe }))
   );
 }
 
 seed();
 
-function getRecipes() {
+function getUser() {
+  return {
+    email: "name@example.com",
+    firstName: "Zach",
+    lastName: "Taylor",
+  };
+}
+
+function getRecipes(userId: string) {
   return [
     {
+      userId,
       name: "Beef Enchiladas",
       totalTime: "20 min",
       image: "",
@@ -30,6 +40,7 @@ function getRecipes() {
       },
     },
     {
+      userId,
       name: "Buttermilk Pancakes",
       totalTime: "15 min",
       image: "",
@@ -49,6 +60,7 @@ function getRecipes() {
       },
     },
     {
+      userId,
       name: "French Dip Sandwiches",
       totalTime: "4-10 hrs (crockpot)",
       image: "",
@@ -66,6 +78,7 @@ function getRecipes() {
       },
     },
     {
+      userId,
       name: "Shepherds Pie",
       totalTime: "40 min",
       image: "",
@@ -85,6 +98,7 @@ function getRecipes() {
       },
     },
     {
+      userId,
       name: "Chicken Alfredo",
       totalTime: "90 min",
       image: "",
@@ -109,6 +123,7 @@ function getRecipes() {
       },
     },
     {
+      userId,
       name: "Chicken Enchiladas",
       totalTime: "35 min",
       image: "",

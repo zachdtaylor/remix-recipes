@@ -13,21 +13,24 @@ import * as Recipe from "~/model/recipe";
 import { PrimaryButton, RecipeCard } from "~/components/lib";
 import { PlusIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
+import { requireAuthSession } from "~/utils/auth.server";
 
 type LoaderData = {
   recipes: Array<RecipeType>;
 };
 
 export const loader: LoaderFunction = async ({ request }) => {
+  const session = await requireAuthSession(request);
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   return {
-    recipes: await Recipe.searchRecipes(q),
+    recipes: await Recipe.searchRecipes(session.get("userId"), q),
   };
 };
 
-export const action: ActionFunction = async () => {
-  const recipe = await Recipe.createRecipe();
+export const action: ActionFunction = async ({ request }) => {
+  const session = await requireAuthSession(request);
+  const recipe = await Recipe.createRecipe(session.get("userId"));
   return redirect(`recipes/${recipe.id}`);
 };
 
