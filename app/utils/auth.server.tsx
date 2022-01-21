@@ -4,7 +4,6 @@ import {
   createCookieSessionStorage,
   redirect,
   json,
-  LoaderFunction,
 } from "remix";
 import { decrypt, encrypt } from "./cryptography.server";
 import { sendEmail } from "./email.server";
@@ -82,6 +81,17 @@ export function validateMagicValue(magic: string) {
   return magicLinkPayload;
 }
 
+export function getMagicLinkPayload(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const magic = searchParams.get("magic");
+
+  if (typeof magic !== "string") {
+    throw invalidMagicLink();
+  }
+
+  return validateMagicValue(magic);
+}
+
 export function sendMagicLinkEmail(email: string) {
   const link = generateMagicLink(email);
   const html = renderToStaticMarkup(
@@ -116,16 +126,3 @@ function isMagicLinkPayload(obj: any): obj is MagicLinkPayload {
 function invalidMagicLink(message?: string) {
   return json({ message: message || "Invalid magic link" }, { status: 400 });
 }
-
-export const validateLoader: LoaderFunction = async ({ request }) => {
-  const { searchParams } = new URL(request.url);
-  const magic = searchParams.get("magic");
-
-  if (typeof magic !== "string") {
-    throw invalidMagicLink();
-  }
-
-  const magicLinkPayload = validateMagicValue(magic);
-
-  return json(magicLinkPayload);
-};

@@ -5,6 +5,7 @@ type InputProps = {
   placeholder?: string;
   defaultValue?: string;
   className?: string;
+  required?: boolean;
 };
 export function Input({
   name,
@@ -12,10 +13,12 @@ export function Input({
   defaultValue,
   className,
   type,
+  required,
 }: InputProps & { type: string }) {
   return (
     <input
       type={type}
+      required={required}
       name={name}
       placeholder={placeholder}
       defaultValue={defaultValue}
@@ -25,13 +28,18 @@ export function Input({
   );
 }
 
-export function TextInput({ className, ...props }: InputProps) {
+export function TextInput({
+  className,
+  showBorder,
+  ...props
+}: InputProps & { showBorder?: boolean }) {
   return (
     <Input
       {...props}
       type="text"
       className={classNames(
-        "border-b-2 border-b-white focus:border-b-primary",
+        "border-b-2 focus:border-b-primary",
+        showBorder ? "border-b-gray-200" : "border-b-white",
         className
       )}
     />

@@ -21,7 +21,6 @@ export const loader: LoaderFunction = async ({ request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
 
-  // Step 1. Validate the form
   const email = formData.get("email");
   if (typeof email !== "string" || !isValidEmail(email)) {
     return json(
@@ -38,7 +37,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Login() {
   const actionData = useActionData();
   return (
-    <div className="h-full text-center">
+    <div className="text-center">
       {actionData?.ok ? (
         <div className="mt-36">
           <h1 className="text-2xl py-8">Yum! 🍲</h1>
