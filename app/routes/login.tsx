@@ -7,7 +7,7 @@ import {
 } from "remix";
 import { EmailInput } from "~/components/forms";
 import { PrimaryButton } from "~/components/lib";
-import { generateMagicLink, getSessionUserId } from "~/utils/auth.server";
+import { getSessionUserId, sendMagicLinkEmail } from "~/utils/auth.server";
 import { isValidEmail } from "~/utils/validation";
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -30,18 +30,19 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  const link = generateMagicLink(email);
+  await sendMagicLinkEmail(email);
 
-  return json({ link });
+  return json({ ok: true });
 };
 
 export default function Login() {
   const actionData = useActionData();
   return (
     <div className="h-full text-center">
-      {actionData?.link ? (
+      {actionData?.ok ? (
         <div className="mt-36">
-          <a href={actionData.link}>I'm magic</a>
+          <h1 className="text-2xl py-8">Yum! 🍲</h1>
+          <p>Check your email and click the link to finish logging in.</p>
         </div>
       ) : (
         <div className="mt-36">

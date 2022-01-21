@@ -1,3 +1,4 @@
+import { renderToStaticMarkup } from "react-dom/server";
 import {
   createCookie,
   createCookieSessionStorage,
@@ -6,6 +7,7 @@ import {
   LoaderFunction,
 } from "remix";
 import { decrypt, encrypt } from "./cryptography.server";
+import { sendEmail } from "./email.server";
 
 if (typeof process.env.AUTH_SESSION_SECRET !== "string") {
   throw new Error("Missing env var `AUTH_SESSION_SECRET`");
@@ -66,6 +68,29 @@ export function decryptMagicValue(magic: string) {
   } catch {
     throw invalidMagicLink();
   }
+}
+
+export function sendMagicLinkEmail(email: string) {
+  const link = generateMagicLink(email);
+  const html = renderToStaticMarkup(
+    <div>
+      <h1>Log in to Remix Recipes</h1>
+      <p>
+        Hey, there! Click the link below to finish logging in to the Remix
+        Recipes app.
+      </p>
+      <a href={link}>Complete Login</a>
+    </div>
+  );
+  if (process.env.NODE_ENV === "production") {
+    return sendEmail({
+      from: "Remix Recipes <zachtylr04@gmail.com>",
+      to: email,
+      subject: "Log in to Remix Recipes!",
+      html,
+    });
+  }
+  console.log("Here's your magic link:", link);
 }
 
 function isMagicLinkPayload(obj: any): obj is MagicLinkPayload {
