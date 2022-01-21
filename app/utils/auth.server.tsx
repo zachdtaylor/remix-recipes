@@ -42,12 +42,16 @@ export async function getSessionUserId(request: Request) {
 }
 
 /// Magic Links
+const magicLinkExpirationTime = 1000 * 60 * 10; // 10 minutes
+
 type MagicLinkPayload = {
   email: string;
+  createdAt: string;
 };
 export function generateMagicLink(email: string) {
   const payload: MagicLinkPayload = {
     email,
+    createdAt: new Date().toISOString(),
   };
   const magicValue = encrypt(JSON.stringify(payload));
   const url = new URL(process.env.ORIGIN as string);
@@ -56,18 +60,26 @@ export function generateMagicLink(email: string) {
   return url.toString();
 }
 
-export function decryptMagicValue(magic: string) {
+export function validateMagicValue(magic: string) {
+  let magicLinkPayload;
   try {
-    const magicLinkPayload = JSON.parse(decrypt(magic));
-
-    if (!isMagicLinkPayload(magicLinkPayload)) {
-      throw invalidMagicLink();
-    }
-
-    return magicLinkPayload;
+    magicLinkPayload = JSON.parse(decrypt(magic));
   } catch {
     throw invalidMagicLink();
   }
+
+  if (!isMagicLinkPayload(magicLinkPayload)) {
+    throw invalidMagicLink();
+  }
+
+  const createdAt = new Date(magicLinkPayload.createdAt);
+  const expireTime = createdAt.getTime() + magicLinkExpirationTime;
+
+  if (Date.now() > expireTime) {
+    throw invalidMagicLink("Magic link has expired. Please try again.");
+  }
+
+  return magicLinkPayload;
 }
 
 export function sendMagicLinkEmail(email: string) {
@@ -94,11 +106,15 @@ export function sendMagicLinkEmail(email: string) {
 }
 
 function isMagicLinkPayload(obj: any): obj is MagicLinkPayload {
-  return typeof obj === "object" && typeof obj.email === "string";
+  return (
+    typeof obj === "object" &&
+    typeof obj.email === "string" &&
+    typeof obj.createdAt === "string"
+  );
 }
 
-function invalidMagicLink() {
-  return json({ message: "Invalid magic link" }, { status: 400 });
+function invalidMagicLink(message?: string) {
+  return json({ message: message || "Invalid magic link" }, { status: 400 });
 }
 
 export const validateLoader: LoaderFunction = async ({ request }) => {
@@ -109,7 +125,7 @@ export const validateLoader: LoaderFunction = async ({ request }) => {
     throw invalidMagicLink();
   }
 
-  const magicLinkPayload = decryptMagicValue(magic);
+  const magicLinkPayload = validateMagicValue(magic);
 
   return json(magicLinkPayload);
 };
