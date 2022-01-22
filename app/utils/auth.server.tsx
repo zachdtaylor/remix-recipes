@@ -21,6 +21,7 @@ const sessionCookie = createCookie("remix-planner__session", {
   httpOnly: true,
   sameSite: "lax",
   path: "/",
+  maxAge: 86400 * 365, // 1 year
 });
 
 export const authSession = createCookieSessionStorage({
