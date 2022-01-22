@@ -43,10 +43,10 @@ export default function Recipes() {
   const [searchParams] = useSearchParams();
   const transition = useTransition();
 
-  const isSearchSubmitting = transition.type === "loaderSubmission";
+  const isSearchSubmitting =
+    transition.submission?.formData.get("_action") === "search";
   const isAddSubmitting =
-    transition.type === "actionSubmission" ||
-    transition.type === "actionRedirect";
+    transition.submission?.formData.get("_action") === "add";
 
   return (
     <div className="lg:flex h-full">
@@ -57,6 +57,7 @@ export default function Recipes() {
         )}
       >
         <Form className="flex border-2 border-gray-300 rounded-md">
+          <input type="hidden" name="_action" value="search" />
           <button className="pl-3 pr-2 mr-1">
             {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
           </button>
@@ -72,6 +73,7 @@ export default function Recipes() {
         <ul>
           <li className="my-4">
             <Form method="post" action="/software/recipes">
+              <input type="hidden" name="_action" value="add" />
               <PrimaryButton className="w-full" disabled={isAddSubmitting}>
                 <PlusIcon />
                 {isAddSubmitting ? "Adding" : "Add New"}
