@@ -19,6 +19,7 @@ import sharedStyles from "./styles/shared.css";
 import styles from "./styles/root.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
+import { LinkButton } from "./components/lib";
 
 export const links: LinksFunction = () => {
   return [
@@ -101,9 +102,7 @@ export function CatchBoundary() {
             {caught.status} {caught.statusText}
           </h1>
           <p className="mb-4">{caught.data?.message}</p>
-          <Link to="/" className="bg-primary text-white px-3 py-2 rounded-md">
-            Take me home
-          </Link>
+          <LinkButton to="/">Take me home</LinkButton>
         </div>
       </body>
     </html>
@@ -123,9 +122,7 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
         <div className="p-4">
           <h1 className="text-2xl pb-3">An unexpected error occurred</h1>
           <p className="mb-4">{error.message}</p>
-          <Link to="/" className="bg-primary text-white px-3 py-2 rounded-md">
-            Take me home
-          </Link>
+          <LinkButton to="/">Take me home</LinkButton>
         </div>
       </body>
     </html>

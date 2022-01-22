@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "remix";
+import { Link, NavLink } from "remix";
 import { classNames } from "~/utils/misc";
 import { TimeIcon } from "./icons";
 
@@ -182,5 +182,19 @@ export function SecondaryButton({
     >
       {children}
     </Button>
+  );
+}
+
+export function LinkButton({
+  to,
+  children,
+}: {
+  to: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link to={to} className="bg-primary text-white px-3 py-2 rounded-md">
+      {children}
+    </Link>
   );
 }
