@@ -5,13 +5,15 @@ import {
   useLocation,
   redirect,
   useSearchParams,
+  Form,
+  useTransition,
 } from "remix";
 import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipe as RecipeType } from "@prisma/client";
 import * as Recipe from "~/model/recipe";
 import { PrimaryButton, RecipeCard } from "~/components/lib";
-import { PlusIcon } from "~/components/icons";
+import { LoadingIcon, PlusIcon, SearchIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
 import { requireAuthSession } from "~/utils/auth.server";
 
@@ -31,7 +33,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const session = await requireAuthSession(request);
   const recipe = await Recipe.createRecipe(session.get("userId"));
-  return redirect(`recipes/${recipe.id}`);
+  return redirect(`/software/recipes/${recipe.id}`);
 };
 
 export default function Recipes() {
@@ -39,6 +41,13 @@ export default function Recipes() {
   const params = useParams();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const transition = useTransition();
+
+  const isSearchSubmitting = transition.type === "loaderSubmission";
+  const isAddSubmitting =
+    transition.type === "actionSubmission" ||
+    transition.type === "actionRedirect";
+
   return (
     <div className="lg:flex h-full">
       <div
@@ -47,40 +56,48 @@ export default function Recipes() {
           params.id ? "hidden" : ""
         )}
       >
-        <form>
+        <Form className="flex border-2 border-gray-300 rounded-md">
+          <button className="pl-3 pr-2 mr-1">
+            {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
+          </button>
           <input
-            className="w-full py-3 px-2 border-2 border-gray-300 rounded-md"
+            className="w-full py-3 px-2 rounded-md"
             type="text"
             name="q"
             placeholder="Search recipes"
             defaultValue={searchParams.get("q") || ""}
             autoComplete="off"
           />
-        </form>
+        </Form>
         <ul>
           <li className="my-4">
-            <form method="post" action="/software/recipes">
-              <PrimaryButton className="w-full">
-                <PlusIcon /> Add New
+            <Form method="post" action="/software/recipes">
+              <PrimaryButton className="w-full" disabled={isAddSubmitting}>
+                <PlusIcon />
+                {isAddSubmitting ? "Adding" : "Add New"}
               </PrimaryButton>
-            </form>
+            </Form>
           </li>
-          {data?.recipes.map((recipe) => (
-            <li className="my-4">
-              <NavLink
-                key={recipe.id}
-                to={{ pathname: recipe.id, search: location.search }}
-              >
-                {({ isActive }) => (
-                  <RecipeCard
-                    title={recipe.name}
-                    totalTime={recipe.totalTime}
-                    isActive={isActive}
-                  />
-                )}
-              </NavLink>
-            </li>
-          ))}
+          {data?.recipes.map((recipe) => {
+            const isNext = !!transition.location?.pathname?.includes(recipe.id);
+            return (
+              <li className="my-4" key={recipe.id}>
+                <NavLink
+                  key={recipe.id}
+                  to={{ pathname: recipe.id, search: location.search }}
+                >
+                  {({ isActive }) => (
+                    <RecipeCard
+                      title={`${recipe.name}${isNext ? "..." : ""}`}
+                      totalTime={recipe.totalTime}
+                      isActive={isActive}
+                      isNext={isNext}
+                    />
+                  )}
+                </NavLink>
+              </li>
+            );
+          })}
         </ul>
         <br />
       </div>

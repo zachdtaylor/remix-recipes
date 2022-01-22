@@ -64,15 +64,22 @@ type RecipeCardProps = {
   title: string;
   totalTime: string;
   isActive: boolean;
+  isNext: boolean;
 };
-export function RecipeCard({ title, totalTime, isActive }: RecipeCardProps) {
+export function RecipeCard({
+  title,
+  totalTime,
+  isActive,
+  isNext,
+}: RecipeCardProps) {
   return (
     <div
       className={classNames(
         "group",
         "p-4 shadow-md rounded-md border-2 border-white",
         "hover:text-primary hover:border-primary",
-        isActive ? "border-primary text-primary" : ""
+        isActive ? "border-primary text-primary" : "",
+        isNext ? "border-gray-500 text-gray-500" : ""
       )}
     >
       <h3 className="font-semibold mb-1">{title}</h3>
@@ -126,6 +133,7 @@ type ButtonProps = {
   type?: "submit" | "button" | "reset";
   name?: string;
   value?: string;
+  disabled?: boolean;
 };
 function Button({ children, className, ...props }: ButtonProps) {
   return (
@@ -153,12 +161,18 @@ export function DeleteButton({ children, className, ...props }: ButtonProps) {
   );
 }
 
-export function PrimaryButton({ children, className, ...props }: ButtonProps) {
+export function PrimaryButton({
+  children,
+  className,
+  disabled,
+  ...props
+}: ButtonProps) {
   return (
     <Button
       {...props}
       className={classNames(
         "text-white bg-primary hover:bg-primary-light",
+        disabled ? "bg-primary-light" : "",
         className
       )}
     >
