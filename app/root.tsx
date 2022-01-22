@@ -91,6 +91,7 @@ export function CatchBoundary() {
     <html>
       <head>
         <title>Oops!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
@@ -114,6 +115,7 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
     <html>
       <head>
         <title>Oops!</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
