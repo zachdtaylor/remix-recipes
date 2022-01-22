@@ -19,6 +19,8 @@ if (typeof process.env.ORIGIN !== "string") {
 const sessionCookie = createCookie("remix-planner__session", {
   secrets: [process.env.AUTH_SESSION_SECRET],
   httpOnly: true,
+  sameSite: "lax",
+  path: "/",
 });
 
 export const authSession = createCookieSessionStorage({

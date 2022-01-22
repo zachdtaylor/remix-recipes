@@ -1,13 +1,34 @@
-import { LoaderFunction, useActionData, json, ActionFunction } from "remix";
+import {
+  LoaderFunction,
+  useActionData,
+  json,
+  ActionFunction,
+  redirect,
+} from "remix";
 import { TextInput } from "~/components/forms";
 import { PrimaryButton } from "~/components/lib";
-import { getMagicLinkPayload } from "~/utils/auth.server";
+import { authSession, getMagicLinkPayload } from "~/utils/auth.server";
 import { classNames } from "~/utils/misc";
+import * as User from "~/model/user";
 
 export const loader: LoaderFunction = async ({ request }) => {
   const magicLinkPayload = getMagicLinkPayload(request);
+  const user = await User.getUserByEmail(magicLinkPayload.email);
 
-  return json(magicLinkPayload);
+  // Still need to sign up, so just return ok
+  if (!user) {
+    return json("ok");
+  }
+
+  const cookie = request.headers.get("cookie");
+  const session = await authSession.getSession(cookie);
+  session.set("userId", user.id);
+
+  return redirect("/", {
+    headers: {
+      "Set-Cookie": await authSession.commitSession(session),
+    },
+  });
 };
 
 export const action: ActionFunction = async ({ request }) => {
@@ -31,7 +52,22 @@ export const action: ActionFunction = async ({ request }) => {
     );
   }
 
-  return null;
+  // Magic link is valid and form is good, so create the user.
+  const user = await User.createUser({
+    email: magicLinkPayload.email,
+    firstName,
+    lastName,
+  });
+
+  const cookie = request.headers.get("cookie");
+  const session = await authSession.getSession(cookie);
+  session.set("userId", user.id);
+
+  return redirect("/", {
+    headers: {
+      "Set-Cookie": await authSession.commitSession(session),
+    },
+  });
 };
 
 export default function Validate() {
