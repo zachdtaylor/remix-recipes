@@ -119,21 +119,21 @@ export default function RecipeRoute() {
         <tbody>
           {data.recipe.ingredients.map((ingredient) => (
             <tr key={ingredient.id}>
-              <td className="pr-4">
+              <td className="pr-4 py-1">
                 <TextInput
                   name={`ingredient.${ingredient.id}.amount`}
                   defaultValue={ingredient.amount}
                   className="w-full"
                 />
               </td>
-              <td className="pr-4">
+              <td className="pr-4 py-1">
                 <TextInput
                   name={`ingredient.${ingredient.id}.name`}
                   defaultValue={ingredient.name}
                   className="w-full"
                 />
               </td>
-              <td className="text-right">
+              <td className="text-right py-1">
                 <button
                   name="_action"
                   value={`delete-ingredient.${ingredient.id}`}
