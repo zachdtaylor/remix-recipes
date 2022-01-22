@@ -39,7 +39,7 @@ export default function Login() {
   return (
     <div className="text-center">
       {actionData?.ok ? (
-        <div className="mt-36">
+        <div className="mt-36 mx-4">
           <h1 className="text-2xl py-8">Yum! 🍲</h1>
           <p>Check your email and click the link to finish logging in.</p>
         </div>
