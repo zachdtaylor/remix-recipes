@@ -2,20 +2,30 @@ import type {
   Ingredient as IngredientType,
   Recipe as RecipeType,
 } from "@prisma/client";
-import { LoaderFunction, ActionFunction, redirect } from "remix";
+import {
+  LoaderFunction,
+  ActionFunction,
+  redirect,
+  Form,
+  useFetcher,
+  useActionData,
+  useSubmit,
+} from "remix";
 import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
-import { TextInput } from "~/components/forms";
+import { TextArea, TextInput } from "~/components/forms";
 import { Heading2 } from "~/components/heading";
 import { PlusIcon, TimeIcon, TrashIcon } from "~/components/icons";
 import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
 import { parseRecipieFormData } from "~/utils/http";
-import { classNames } from "~/utils/misc";
+import { classNames, isEmpty, maxDate } from "~/utils/misc";
 import invariant from "tiny-invariant";
+import { validateRecipe } from "~/utils/validation";
 
 type LoaderData = {
   recipe: RecipeType & { ingredients: Array<IngredientType> };
+  updatedAt: string;
 };
 export const loader: LoaderFunction = async ({ params }) => {
   const recipe = await Recipe.getRecipe(params.id);
@@ -31,6 +41,10 @@ export const loader: LoaderFunction = async ({ params }) => {
   }
   return {
     recipe,
+    updatedAt: maxDate(
+      recipe.updatedAt,
+      ...recipe.ingredients.map((ingredient) => ingredient.updatedAt)
+    ),
   };
 };
 
@@ -65,10 +79,7 @@ export const action: ActionFunction = async ({ params, request }) => {
   const formData = await parseRecipieFormData(request);
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(id);
-    return redirect("..");
-  }
-  if (formData._action === "save") {
-    return saveRecipie(id, formData);
+    return redirect("/software/recipes");
   }
   if (formData._action === "add-ingredient") {
     return Ingredient.createIngredient(id);
@@ -77,26 +88,45 @@ export const action: ActionFunction = async ({ params, request }) => {
     const ingredientId = formData._action.split(".")[1];
     return Ingredient.deleteIngredient(ingredientId);
   }
-  return null;
+  const errors = validateRecipe(formData);
+  if (!isEmpty(errors)) {
+    return { errors };
+  }
+  return saveRecipie(id, formData);
 };
 
 export default function RecipeRoute() {
   const data = useLoaderData<LoaderData>();
+  const submit = useSubmit();
+  const actionData = useActionData();
+
+  const save = (name: string, value: string) => {
+    submit({ _action: "save", [name]: value }, { method: "post" });
+  };
+
+  const errors = actionData?.errors;
+
   return (
-    <form method="post">
+    <Form id="recipe-form" method="post">
       <TextInput
+        inputKey={data.recipe.id}
         name="name"
         placeholder="Recipie Name"
         defaultValue={data.recipe.name}
+        onChanged={(e) => save("name", e.target.value)}
+        error={errors?.name}
         className="text-2xl font-extrabold mb-2 w-full"
       />
-      <div className="flex justify-between">
+      <div className="flex justify-between items-center">
         <div className="flex font-light text-gray-500 items-center">
           <TimeIcon />
           <TextInput
+            inputKey={data.recipe.id}
             name="totalTime"
             placeholder="Time"
             defaultValue={data.recipe.totalTime}
+            onChanged={(e) => save("totalTime", e.target.value)}
+            error={errors?.totalTime}
             className="ml-1"
           />
         </div>
@@ -123,6 +153,10 @@ export default function RecipeRoute() {
                 <TextInput
                   name={`ingredient.${ingredient.id}.amount`}
                   defaultValue={ingredient.amount}
+                  placeholder="---"
+                  onChanged={(e) =>
+                    save(`ingredient.${ingredient.id}.amount`, e.target.value)
+                  }
                   className="w-full"
                 />
               </td>
@@ -130,6 +164,10 @@ export default function RecipeRoute() {
                 <TextInput
                   name={`ingredient.${ingredient.id}.name`}
                   defaultValue={ingredient.name}
+                  placeholder="---"
+                  onChanged={(e) =>
+                    save(`ingredient.${ingredient.id}.name`, e.target.value)
+                  }
                   className="w-full"
                 />
               </td>
@@ -146,15 +184,13 @@ export default function RecipeRoute() {
         </tbody>
       </table>
       <Heading2 className="mb-2">Instructions</Heading2>
-      <textarea
+      <TextArea
+        key={data.recipe.id}
         name="instructions"
         placeholder="Instructions"
         defaultValue={data.recipe.instructions}
-        className={classNames(
-          "w-full h-56 outline-none rounded-md",
-          "border-2 border-white focus:border-primary",
-          "focus:p-3 transition-all duration-300"
-        )}
+        onChanged={(e) => save("instructions", e.target.value)}
+        error={errors?.instructions}
       />
       <hr className="my-4" />
       <div className="flex justify-between">
@@ -165,7 +201,7 @@ export default function RecipeRoute() {
           Delete this Recipe
         </DeleteButton>
       </div>
-    </form>
+    </Form>
   );
 }
 
