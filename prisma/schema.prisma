@@ -30,6 +30,7 @@ model Ingredient {
   name      String
   amount    String
   recipeId  String
+  index     Int      @default(autoincrement())
   recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 }
 
