@@ -31,7 +31,7 @@ export function getRecipe(id?: string) {
     include: {
       ingredients: {
         orderBy: {
-          createdAt: "desc",
+          index: "desc",
         },
       },
     },
