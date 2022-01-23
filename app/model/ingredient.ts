@@ -5,8 +5,8 @@ export function createIngredient(recipieId: string) {
   return db.ingredient.create({
     data: {
       recipeId: recipieId,
-      name: "new ingredient",
-      amount: "some amount",
+      name: "",
+      amount: "",
     },
   });
 }
