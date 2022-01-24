@@ -48,7 +48,7 @@ export function searchRecipes(userId: string, query: string | null) {
       },
     },
     orderBy: {
-      updatedAt: "desc",
+      createdAt: "desc",
     },
   });
 }

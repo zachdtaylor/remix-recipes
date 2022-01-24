@@ -8,8 +8,6 @@ import {
   redirect,
   Form,
   useFetcher,
-  useActionData,
-  useSubmit,
 } from "remix";
 import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
 import { TextArea, TextInput } from "~/components/forms";
@@ -88,23 +86,37 @@ export const action: ActionFunction = async ({ params, request }) => {
     const ingredientId = formData._action.split(".")[1];
     return Ingredient.deleteIngredient(ingredientId);
   }
-  const errors = validateRecipe(formData);
-  if (!isEmpty(errors)) {
-    return { errors };
-  }
+  // const errors = validateRecipe(formData);
+  // if (!isEmpty(errors)) {
+  //   return { id, errors };
+  // }
   return saveRecipie(id, formData);
 };
 
 export default function RecipeRoute() {
   const data = useLoaderData<LoaderData>();
-  const submit = useSubmit();
-  const actionData = useActionData();
+  const nameFetcher = useFetcher();
+  const timeFetcher = useFetcher();
+  const otherFetcher = useFetcher();
 
   const save = (name: string, value: string) => {
-    submit({ _action: "save", [name]: value }, { method: "post" });
+    if (name === "name") {
+      return nameFetcher.submit(
+        { _action: "save", [name]: value },
+        { method: "post" }
+      );
+    }
+    if (name === "totalTime") {
+      return timeFetcher.submit(
+        { _action: "save", [name]: value },
+        { method: "post" }
+      );
+    }
+    return otherFetcher.submit(
+      { _action: "save", [name]: value },
+      { method: "post" }
+    );
   };
-
-  const errors = actionData?.errors;
 
   return (
     <Form id="recipe-form" method="post">
@@ -114,7 +126,10 @@ export default function RecipeRoute() {
         placeholder="Recipie Name"
         defaultValue={data.recipe.name}
         onChanged={(e) => save("name", e.target.value)}
-        error={errors?.name}
+        error={
+          nameFetcher.data?.id === data.recipe.id &&
+          nameFetcher.data?.errors.name
+        }
         className="text-2xl font-extrabold mb-2 w-full"
       />
       <div className="flex justify-between items-center">
@@ -126,7 +141,10 @@ export default function RecipeRoute() {
             placeholder="Time"
             defaultValue={data.recipe.totalTime}
             onChanged={(e) => save("totalTime", e.target.value)}
-            error={errors?.totalTime}
+            error={
+              timeFetcher.data?.id === data.recipe.id &&
+              timeFetcher.data?.errors.totalTime
+            }
             className="ml-1"
           />
         </div>
@@ -190,7 +208,6 @@ export default function RecipeRoute() {
         placeholder="Instructions"
         defaultValue={data.recipe.instructions}
         onChanged={(e) => save("instructions", e.target.value)}
-        error={errors?.instructions}
       />
       <hr className="my-4" />
       <div className="flex justify-between">

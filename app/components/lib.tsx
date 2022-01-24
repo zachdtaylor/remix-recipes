@@ -64,13 +64,13 @@ type RecipeCardProps = {
   title: string;
   totalTime: string;
   isActive: boolean;
-  isNext: boolean;
+  isLoading: boolean;
 };
 export function RecipeCard({
   title,
   totalTime,
   isActive,
-  isNext,
+  isLoading,
 }: RecipeCardProps) {
   return (
     <div
@@ -79,7 +79,7 @@ export function RecipeCard({
         "p-4 shadow-md rounded-md border-2 border-white",
         "hover:text-primary hover:border-primary",
         isActive ? "border-primary text-primary" : "",
-        isNext ? "border-gray-500 text-gray-500" : ""
+        isLoading ? "border-gray-500 text-gray-500" : ""
       )}
     >
       <h3 className="font-semibold mb-1">{title}</h3>

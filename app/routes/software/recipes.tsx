@@ -7,6 +7,7 @@ import {
   useSearchParams,
   Form,
   useTransition,
+  useFetchers,
 } from "remix";
 import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
@@ -42,6 +43,7 @@ export default function Recipes() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const transition = useTransition();
+  const fetchers = useFetchers();
 
   const isSearchSubmitting =
     transition.submission?.formData.get("_action") === "search";
@@ -82,6 +84,30 @@ export default function Recipes() {
           </li>
           {data?.recipes.map((recipe) => {
             const isNext = !!transition.location?.pathname?.includes(recipe.id);
+            const isLoading = isNext && transition.type === "normalLoad";
+
+            const optimisticData = new Map();
+            for (const fetcher of fetchers) {
+              if (fetcher.submission?.action?.includes(recipe.id)) {
+                if (fetcher.submission.formData.has("name")) {
+                  optimisticData.set(
+                    "name",
+                    fetcher.submission.formData.get("name")
+                  );
+                }
+                if (fetcher.submission.formData.has("totalTime")) {
+                  optimisticData.set(
+                    "totalTime",
+                    fetcher.submission.formData.get("totalTime")
+                  );
+                }
+              }
+            }
+
+            const title = optimisticData.get("name") || recipe.name;
+            const totalTime =
+              optimisticData.get("totalTime") || recipe.totalTime;
+
             return (
               <li className="my-4" key={recipe.id}>
                 <NavLink
@@ -90,10 +116,10 @@ export default function Recipes() {
                 >
                   {({ isActive }) => (
                     <RecipeCard
-                      title={`${recipe.name}${isNext ? "..." : ""}`}
-                      totalTime={recipe.totalTime}
+                      title={`${title}${isLoading ? "..." : ""}`}
+                      totalTime={totalTime}
                       isActive={isActive}
-                      isNext={isNext}
+                      isLoading={isLoading}
                     />
                   )}
                 </NavLink>
