@@ -11,12 +11,19 @@ export function createIngredient(recipieId: string) {
   });
 }
 
-export function updateIngredient(id: string, data: Partial<Ingredient>) {
-  return db.ingredient.update({
+export function createOrUpdateIngredient(
+  recipeId: string,
+  id: string,
+  data: Partial<Ingredient>
+) {
+  const name = data.name || "";
+  const amount = data.amount || "";
+  return db.ingredient.upsert({
     where: {
       id: id,
     },
-    data,
+    create: { recipeId, name, amount, ...data },
+    update: data,
   });
 }
 
