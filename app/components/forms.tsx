@@ -13,6 +13,7 @@ type InputProps = {
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => any;
   inputKey?: any;
   error?: string;
+  disabled?: boolean;
 };
 export function Input({
   name,
@@ -26,6 +27,7 @@ export function Input({
   onChanged,
   inputKey,
   onBlur,
+  disabled,
 }: InputProps & { type: string }) {
   return (
     <input
@@ -44,6 +46,7 @@ export function Input({
       placeholder={placeholder}
       defaultValue={defaultValue}
       autoComplete="off"
+      disabled={disabled}
       className={classNames("outline-none", className)}
     />
   );
