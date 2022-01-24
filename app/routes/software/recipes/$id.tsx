@@ -8,18 +8,26 @@ import {
   redirect,
   Form,
   useFetcher,
+  useTransition,
+  FormMethod,
 } from "remix";
 import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
 import { TextArea, TextInput } from "~/components/forms";
 import { Heading2 } from "~/components/heading";
-import { PlusIcon, TimeIcon, TrashIcon } from "~/components/icons";
+import {
+  PlusIcon,
+  ThreeDotsIcon,
+  TimeIcon,
+  TrashIcon,
+} from "~/components/icons";
 import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
 import { parseRecipieFormData } from "~/utils/http";
-import { classNames, isEmpty, maxDate } from "~/utils/misc";
+import { formatDateTime, maxDate, useMounted } from "~/utils/misc";
 import invariant from "tiny-invariant";
 import { validateRecipe } from "~/utils/validation";
+import React from "react";
 
 type LoaderData = {
   recipe: RecipeType & { ingredients: Array<IngredientType> };
@@ -47,10 +55,10 @@ export const loader: LoaderFunction = async ({ params }) => {
 };
 
 function saveRecipie(
-  id: string,
+  recipeId: string,
   formData: { [key: string]: string | undefined }
 ) {
-  const recipiePromise = Recipe.updateRecipe(id, {
+  const recipiePromise = Recipe.updateRecipe(recipeId, {
     name: formData.name,
     totalTime: formData.totalTime,
     instructions: formData.instructions,
@@ -64,7 +72,9 @@ function saveRecipie(
         name === "amount" || name === "name",
         `invalid form input name ${key}`
       );
-      return Ingredient.updateIngredient(id, { [name]: formData[key] });
+      return Ingredient.createOrUpdateIngredient(recipeId, id, {
+        [name]: formData[key],
+      });
     });
   return Promise.all([recipiePromise, ...ingredientPromises]);
 }
@@ -93,29 +103,40 @@ export const action: ActionFunction = async ({ params, request }) => {
   return saveRecipie(id, formData);
 };
 
+function createClientIngredient(ingredients: Array<Partial<IngredientType>>) {
+  return {
+    id: `new-${ingredients.length + 1}`,
+    amount: "",
+    name: "",
+  };
+}
+
 export default function RecipeRoute() {
   const data = useLoaderData<LoaderData>();
+  const transition = useTransition();
   const nameFetcher = useFetcher();
   const timeFetcher = useFetcher();
   const otherFetcher = useFetcher();
+  const [newIngredients, setNewIngredients] = React.useState<
+    Array<Partial<IngredientType>>
+  >([]);
+  const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
+  const mounted = useMounted();
+
+  React.useEffect(() => {
+    if (transition.state === "idle") {
+      setNewIngredients([]);
+    }
+  }, [transition.state]);
 
   const save = (name: string, value: string) => {
-    if (name === "name") {
-      return nameFetcher.submit(
-        { _action: "save", [name]: value },
-        { method: "post" }
-      );
-    }
-    if (name === "totalTime") {
-      return timeFetcher.submit(
-        { _action: "save", [name]: value },
-        { method: "post" }
-      );
-    }
-    return otherFetcher.submit(
-      { _action: "save", [name]: value },
-      { method: "post" }
-    );
+    const target = { _action: "save", [name]: value };
+    const options: { method: FormMethod } = { method: "post" };
+    return name === "name"
+      ? nameFetcher.submit(target, options)
+      : name === "totalTime"
+      ? timeFetcher.submit(target, options)
+      : otherFetcher.submit(target, options);
   };
 
   return (
@@ -152,7 +173,17 @@ export default function RecipeRoute() {
       <hr className="my-4" />
       <div className="flex items-center mb-2">
         <Heading2 className="mr-2">Ingredients</Heading2>
-        <button name="_action" value="add-ingredient" className="text-lg">
+        <button
+          name="_action"
+          value="add-ingredient"
+          className="text-lg"
+          onClick={() => {
+            setNewIngredients((ingredients) => [
+              ...ingredients,
+              createClientIngredient(ingredients),
+            ]);
+          }}
+        >
           <PlusIcon />
         </button>
       </div>
@@ -165,40 +196,30 @@ export default function RecipeRoute() {
           </tr>
         </thead>
         <tbody>
-          {data.recipe.ingredients.map((ingredient) => (
-            <tr key={ingredient.id}>
-              <td className="pr-4 py-1">
-                <TextInput
-                  name={`ingredient.${ingredient.id}.amount`}
-                  defaultValue={ingredient.amount}
-                  placeholder="---"
-                  onChanged={(e) =>
-                    save(`ingredient.${ingredient.id}.amount`, e.target.value)
-                  }
-                  className="w-full"
-                />
-              </td>
-              <td className="pr-4 py-1">
-                <TextInput
-                  name={`ingredient.${ingredient.id}.name`}
-                  defaultValue={ingredient.name}
-                  placeholder="---"
-                  onChanged={(e) =>
-                    save(`ingredient.${ingredient.id}.name`, e.target.value)
-                  }
-                  className="w-full"
-                />
-              </td>
-              <td className="text-right py-1">
-                <button
-                  name="_action"
-                  value={`delete-ingredient.${ingredient.id}`}
-                >
-                  <TrashIcon />
-                </button>
-              </td>
-            </tr>
+          {newIngredients.map((ingredient) => (
+            <IngredientRow
+              key={ingredient.id}
+              ingredient={ingredient}
+              save={save}
+              disabled
+            />
           ))}
+          {data.recipe.ingredients.map((ingredient) =>
+            !!deletedIds.find((id) => id === ingredient.id) ? null : (
+              <IngredientRow
+                key={ingredient.id}
+                ingredient={ingredient}
+                save={save}
+                onDelete={() => {
+                  setDeletedIds((ids) => [...ids, ingredient.id]);
+                  otherFetcher.submit(
+                    { _action: `delete-ingredient.${ingredient.id}` },
+                    { method: "post" }
+                  );
+                }}
+              />
+            )
+          )}
         </tbody>
       </table>
       <Heading2 className="mb-2">Instructions</Heading2>
@@ -211,9 +232,13 @@ export default function RecipeRoute() {
       />
       <hr className="my-4" />
       <div className="flex justify-between">
-        <PrimaryButton name="_action" value="save">
-          Save
-        </PrimaryButton>
+        {mounted ? (
+          `Autosaved at ${formatDateTime(data.updatedAt)}`
+        ) : (
+          <PrimaryButton name="_action" value="save">
+            Save
+          </PrimaryButton>
+        )}
         <DeleteButton name="_action" value="delete">
           Delete this Recipe
         </DeleteButton>
@@ -237,3 +262,55 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
     />
   );
 };
+
+type IngredientRowProps = {
+  ingredient: Partial<IngredientType>;
+  save: (name: string, value: string) => void;
+  disabled?: boolean;
+  onDelete?: () => void;
+};
+function IngredientRow({
+  ingredient,
+  save,
+  disabled,
+  onDelete,
+}: IngredientRowProps) {
+  return (
+    <tr key={ingredient.id}>
+      <td className="pr-4 py-1">
+        <TextInput
+          name={`ingredient.${ingredient.id}.amount`}
+          defaultValue={ingredient.amount}
+          placeholder="---"
+          onChanged={(e) =>
+            save(`ingredient.${ingredient.id}.amount`, e.target.value)
+          }
+          className="w-full"
+          disabled={disabled}
+        />
+      </td>
+      <td className="pr-4 py-1">
+        <TextInput
+          name={`ingredient.${ingredient.id}.name`}
+          defaultValue={ingredient.name}
+          placeholder="---"
+          onChanged={(e) =>
+            save(`ingredient.${ingredient.id}.name`, e.target.value)
+          }
+          className="w-full"
+          disabled={disabled}
+        />
+      </td>
+      <td className="text-right py-1">
+        <button
+          name="_action"
+          value={`delete-ingredient.${ingredient.id}`}
+          disabled={disabled}
+          onClick={onDelete}
+        >
+          {disabled ? <ThreeDotsIcon /> : <TrashIcon />}
+        </button>
+      </td>
+    </tr>
+  );
+}

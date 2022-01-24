@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import React from "react";
 
 export function classNames(...names: Array<string | undefined>) {
   const reduced = names.reduce(
@@ -19,4 +20,17 @@ export function isEmpty(obj: object) {
 export function formatDateTime(dateStr: string) {
   const date = new Date(dateStr);
   return format(date, "MMM dd, yyyy h:mm:ss aaa");
+}
+
+export function useMounted() {
+  const mounted = React.useRef(false);
+
+  React.useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  return mounted.current;
 }
