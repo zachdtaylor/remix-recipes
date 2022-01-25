@@ -15,7 +15,7 @@ import { useLoaderData, json, useCatch, ErrorBoundaryComponent } from "remix";
 import { TextArea, TextInput } from "~/components/forms";
 import { Heading2 } from "~/components/heading";
 import {
-  PlusIcon,
+  SaveIcon,
   ThreeDotsIcon,
   TimeIcon,
   TrashIcon,
@@ -29,8 +29,11 @@ import invariant from "tiny-invariant";
 import { validateRecipe } from "~/utils/validation";
 import React from "react";
 
+type PickedIngredient = Pick<IngredientType, "id" | "amount" | "name">;
 type LoaderData = {
-  recipe: RecipeType & { ingredients: Array<IngredientType> };
+  recipe: RecipeType & {
+    ingredients: Array<PickedIngredient>;
+  };
   updatedAt: string;
 };
 export const loader: LoaderFunction = async ({ params }) => {
@@ -65,14 +68,17 @@ function saveRecipie(
     image: formData.image,
   });
   const ingredientPromises = Object.keys(formData)
-    .filter((key) => key.split(".")[0] === "ingredient")
+    .filter((key) => {
+      const [inputType, id, _] = key.split(".");
+      return inputType === "ingredient" && id !== "";
+    })
     .map((key) => {
       const [_, id, name] = key.split(".");
       invariant(
         name === "amount" || name === "name",
         `invalid form input name ${key}`
       );
-      return Ingredient.createOrUpdateIngredient(recipeId, id, {
+      return Ingredient.updateIngredient(id, {
         [name]: formData[key],
       });
     });
@@ -80,17 +86,20 @@ function saveRecipie(
 }
 
 export const action: ActionFunction = async ({ params, request }) => {
-  const id = params.id;
-  if (typeof id === "undefined") {
+  const recipeId = params.id;
+  if (typeof recipeId === "undefined") {
     return null;
   }
   const formData = await parseRecipieFormData(request);
   if (formData._action === "delete") {
-    await Recipe.deleteRecipe(id);
+    await Recipe.deleteRecipe(recipeId);
     return redirect("/software/recipes");
   }
   if (formData._action === "add-ingredient") {
-    return Ingredient.createIngredient(id);
+    return Ingredient.createOrUpdateIngredient(recipeId, formData.id, {
+      name: formData.name,
+      amount: formData.amount,
+    });
   }
   if (formData._action?.includes("delete-ingredient")) {
     const ingredientId = formData._action.split(".")[1];
@@ -100,12 +109,12 @@ export const action: ActionFunction = async ({ params, request }) => {
   // if (!isEmpty(errors)) {
   //   return { id, errors };
   // }
-  return saveRecipie(id, formData);
+  return saveRecipie(recipeId, formData);
 };
 
-function createClientIngredient(ingredients: Array<Partial<IngredientType>>) {
+function createClientIngredient() {
   return {
-    id: `new-${ingredients.length + 1}`,
+    id: "",
     amount: "",
     name: "",
   };
@@ -113,21 +122,11 @@ function createClientIngredient(ingredients: Array<Partial<IngredientType>>) {
 
 export default function RecipeRoute() {
   const data = useLoaderData<LoaderData>();
-  const transition = useTransition();
   const nameFetcher = useFetcher();
   const timeFetcher = useFetcher();
   const otherFetcher = useFetcher();
-  const [newIngredients, setNewIngredients] = React.useState<
-    Array<Partial<IngredientType>>
-  >([]);
   const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
   const mounted = useMounted();
-
-  React.useEffect(() => {
-    if (transition.state === "idle") {
-      setNewIngredients([]);
-    }
-  }, [transition.state]);
 
   const save = (name: string, value: string) => {
     const target = { _action: "save", [name]: value };
@@ -141,6 +140,7 @@ export default function RecipeRoute() {
 
   return (
     <Form id="recipe-form" method="post">
+      <button name="_action" value="save" className="hidden" />
       <TextInput
         inputKey={data.recipe.id}
         name="name"
@@ -173,19 +173,6 @@ export default function RecipeRoute() {
       <hr className="my-4" />
       <div className="flex items-center mb-2">
         <Heading2 className="mr-2">Ingredients</Heading2>
-        <button
-          name="_action"
-          value="add-ingredient"
-          className="text-lg"
-          onClick={() => {
-            setNewIngredients((ingredients) => [
-              ...ingredients,
-              createClientIngredient(ingredients),
-            ]);
-          }}
-        >
-          <PlusIcon />
-        </button>
       </div>
       <table className="mb-4 w-full">
         <thead>
@@ -196,20 +183,11 @@ export default function RecipeRoute() {
           </tr>
         </thead>
         <tbody>
-          {newIngredients.map((ingredient) => (
-            <IngredientRow
-              key={ingredient.id}
-              ingredient={ingredient}
-              save={save}
-              disabled
-            />
-          ))}
-          {data.recipe.ingredients.map((ingredient) =>
+          {data.recipe.ingredients.map((ingredient, index) =>
             !!deletedIds.find((id) => id === ingredient.id) ? null : (
               <IngredientRow
                 key={ingredient.id}
                 ingredient={ingredient}
-                save={save}
                 onDelete={() => {
                   setDeletedIds((ids) => [...ids, ingredient.id]);
                   otherFetcher.submit(
@@ -220,6 +198,14 @@ export default function RecipeRoute() {
               />
             )
           )}
+          <IngredientRow
+            key={data.recipe.ingredients.length}
+            ingredient={{
+              id: "",
+              name: "",
+              amount: "",
+            }}
+          />
         </tbody>
       </table>
       <Heading2 className="mb-2">Instructions</Heading2>
@@ -264,51 +250,98 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
 };
 
 type IngredientRowProps = {
-  ingredient: Partial<IngredientType>;
-  save: (name: string, value: string) => void;
-  disabled?: boolean;
+  ingredient: PickedIngredient;
   onDelete?: () => void;
+  onCreate?: () => void;
 };
-function IngredientRow({
-  ingredient,
-  save,
-  disabled,
-  onDelete,
-}: IngredientRowProps) {
+function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
+  const [formValues, setFormValues] = React.useState(ingredient);
+  const fetcher = useFetcher();
+
+  const save = () => {
+    const name = `ingredient.${ingredient.id}.name`;
+    const amount = `ingredient.${ingredient.id}.amount`;
+    fetcher.submit(
+      { _action: "save", [name]: formValues.name, [amount]: formValues.amount },
+      { method: "post" }
+    );
+  };
+
+  const create = () => {
+    onCreate?.();
+    fetcher.submit(
+      {
+        _action: "add-ingredient",
+        id: ingredient.id,
+        name: formValues.name,
+        amount: formValues.amount,
+      },
+      { method: "post" }
+    );
+  };
+
+  const onBlur = (name: "name" | "amount") =>
+    ingredient.id !== "" && ingredient[name] !== formValues[name] && save();
+
+  const isCreating =
+    fetcher.submission?.formData.get("_action") === "add-ingredient";
+
   return (
     <tr key={ingredient.id}>
       <td className="pr-4 py-1">
         <TextInput
           name={`ingredient.${ingredient.id}.amount`}
-          defaultValue={ingredient.amount}
-          placeholder="---"
-          onChanged={(e) =>
-            save(`ingredient.${ingredient.id}.amount`, e.target.value)
+          value={formValues.amount}
+          onChange={(e) =>
+            setFormValues((values) => ({
+              ...formValues,
+              amount: e.target.value,
+            }))
           }
+          placeholder="---"
+          onBlur={() => onBlur("amount")}
+          onEnter={(e) => {
+            e.preventDefault();
+            create();
+          }}
           className="w-full"
-          disabled={disabled}
+          disabled={isCreating}
         />
       </td>
       <td className="pr-4 py-1">
         <TextInput
           name={`ingredient.${ingredient.id}.name`}
-          defaultValue={ingredient.name}
           placeholder="---"
-          onChanged={(e) =>
-            save(`ingredient.${ingredient.id}.name`, e.target.value)
+          value={formValues.name}
+          onChange={(e) =>
+            setFormValues((values) => ({
+              ...formValues,
+              name: e.target.value,
+            }))
           }
+          onBlur={() => onBlur("name")}
+          onEnter={(e) => {
+            e.preventDefault();
+            create();
+          }}
           className="w-full"
-          disabled={disabled}
+          disabled={isCreating}
         />
       </td>
       <td className="text-right py-1">
         <button
           name="_action"
           value={`delete-ingredient.${ingredient.id}`}
-          disabled={disabled}
-          onClick={onDelete}
+          disabled={isCreating}
+          onClick={ingredient.id === "" ? create : onDelete}
         >
-          {disabled ? <ThreeDotsIcon /> : <TrashIcon />}
+          {isCreating ? (
+            <ThreeDotsIcon />
+          ) : ingredient.id === "" ? (
+            <SaveIcon />
+          ) : (
+            <TrashIcon />
+          )}
         </button>
       </td>
     </tr>

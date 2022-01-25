@@ -11,9 +11,11 @@ type InputProps = {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => any;
   onChanged?: (e: React.FocusEvent<HTMLInputElement>) => any;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => any;
+  onEnter?: (e: React.KeyboardEvent<HTMLInputElement>) => any;
   inputKey?: any;
   error?: string;
   disabled?: boolean;
+  inputRef?: React.MutableRefObject<HTMLInputElement | null>;
 };
 export function Input({
   name,
@@ -25,12 +27,15 @@ export function Input({
   value,
   onChange,
   onChanged,
-  inputKey,
   onBlur,
+  onEnter,
+  inputKey,
   disabled,
+  inputRef,
 }: InputProps & { type: string }) {
   return (
     <input
+      ref={inputRef}
       key={inputKey}
       onBlur={(e) => {
         onBlur?.(e);
@@ -48,6 +53,11 @@ export function Input({
       autoComplete="off"
       disabled={disabled}
       className={classNames("outline-none", className)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          onEnter?.(e);
+        }
+      }}
     />
   );
 }

@@ -11,9 +11,20 @@ export function createIngredient(recipieId: string) {
   });
 }
 
+export function updateIngredient(id: string, data: Partial<Ingredient>) {
+  const name = data.name;
+  const amount = data.amount;
+  return db.ingredient.update({
+    where: {
+      id: id,
+    },
+    data: { name, amount },
+  });
+}
+
 export function createOrUpdateIngredient(
   recipeId: string,
-  id: string,
+  id: string | undefined,
   data: Partial<Ingredient>
 ) {
   const name = data.name || "";

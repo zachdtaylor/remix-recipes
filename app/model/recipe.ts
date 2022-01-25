@@ -9,9 +9,6 @@ export function createRecipe(userId: string) {
       totalTime: "0 min",
       image: "",
       instructions: "How do you make this recipe?",
-      ingredients: {
-        create: [{ amount: "a spoonful", name: "sugar" }],
-      },
     },
   });
 }
@@ -31,7 +28,7 @@ export function getRecipe(id?: string) {
     include: {
       ingredients: {
         orderBy: {
-          index: "desc",
+          index: "asc",
         },
       },
     },
