@@ -34,3 +34,36 @@ export function useMounted() {
 
   return mounted.current;
 }
+
+export function useFocusOnce(condition: boolean) {
+  const ref = React.useRef<HTMLInputElement>(null);
+  const [focusCalled, setFocusCalled] = React.useState(false);
+
+  React.useEffect(() => {
+    if (condition && !focusCalled) {
+      ref.current?.focus();
+      setFocusCalled(true);
+    }
+  }, [ref.current, focusCalled]);
+
+  return ref;
+}
+
+export function useForm(initialValues: { [key: string]: any }) {
+  const [formValues, setFormValues] = React.useState(initialValues);
+
+  const setValue = (name: string, value: any) => {
+    setFormValues((values) => ({
+      ...values,
+      [name]: value,
+    }));
+  };
+
+  const ifChanged = (name: string, callback: () => void) => {
+    if (formValues[name] !== initialValues[name]) {
+      callback();
+    }
+  };
+
+  return { formValues, setValue, ifChanged };
+}

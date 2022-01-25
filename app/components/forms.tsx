@@ -102,6 +102,8 @@ type TextAreaProps = {
   name?: string;
   placeholder?: string;
   defaultValue?: string;
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => any;
   onChanged?: (e: React.FocusEvent<HTMLTextAreaElement>) => any;
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => any;
   className?: string;
