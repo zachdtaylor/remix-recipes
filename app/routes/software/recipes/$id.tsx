@@ -78,7 +78,7 @@ function saveRecipie(
         name === "amount" || name === "name",
         `invalid form input name ${key}`
       );
-      return Ingredient.updateIngredient(id, {
+      return Ingredient.createOrUpdateIngredient(recipeId, id, {
         [name]: formData[key],
       });
     });
@@ -125,6 +125,7 @@ export default function RecipeRoute() {
   const nameFetcher = useFetcher();
   const timeFetcher = useFetcher();
   const otherFetcher = useFetcher();
+  const transition = useTransition();
   const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
   const mounted = useMounted();
 
@@ -137,6 +138,9 @@ export default function RecipeRoute() {
       ? timeFetcher.submit(target, options)
       : otherFetcher.submit(target, options);
   };
+
+  const isDeleting =
+    transition.submission?.formData.get("_action") === "delete";
 
   return (
     <Form id="recipe-form" method="post">
@@ -225,8 +229,8 @@ export default function RecipeRoute() {
             Save
           </PrimaryButton>
         )}
-        <DeleteButton name="_action" value="delete">
-          Delete this Recipe
+        <DeleteButton name="_action" value="delete" disabled={isDeleting}>
+          {isDeleting ? "Deleting" : "Delete this Recipe"}
         </DeleteButton>
       </div>
     </Form>
@@ -255,6 +259,7 @@ type IngredientRowProps = {
   onCreate?: () => void;
 };
 function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
+  const isNew = ingredient.id === "";
   const [formValues, setFormValues] = React.useState(ingredient);
   const fetcher = useFetcher();
 
@@ -280,8 +285,15 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
     );
   };
 
-  const onBlur = (name: "name" | "amount") =>
-    ingredient.id !== "" && ingredient[name] !== formValues[name] && save();
+  const onBlur = (name: "name" | "amount") => {
+    if (ingredient[name] !== formValues[name]) {
+      if (isNew && name === "name") {
+        create();
+      } else {
+        save();
+      }
+    }
+  };
 
   const isCreating =
     fetcher.submission?.formData.get("_action") === "add-ingredient";
@@ -294,7 +306,7 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
           value={formValues.amount}
           onChange={(e) =>
             setFormValues((values) => ({
-              ...formValues,
+              ...values,
               amount: e.target.value,
             }))
           }
@@ -315,7 +327,7 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
           value={formValues.name}
           onChange={(e) =>
             setFormValues((values) => ({
-              ...formValues,
+              ...values,
               name: e.target.value,
             }))
           }
@@ -331,13 +343,15 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
       <td className="text-right py-1">
         <button
           name="_action"
-          value={`delete-ingredient.${ingredient.id}`}
+          value={
+            isNew ? "add-ingredient" : `delete-ingredient.${ingredient.id}`
+          }
           disabled={isCreating}
-          onClick={ingredient.id === "" ? create : onDelete}
+          onClick={isNew ? create : onDelete}
         >
           {isCreating ? (
             <ThreeDotsIcon />
-          ) : ingredient.id === "" ? (
+          ) : isNew ? (
             <SaveIcon />
           ) : (
             <TrashIcon />

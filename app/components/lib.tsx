@@ -151,8 +151,9 @@ export function DeleteButton({ children, className, ...props }: ButtonProps) {
     <Button
       {...props}
       className={classNames(
-        "border-2 text-red-600 border-red-600",
+        "border-2 border-red-600",
         "hover:bg-red-600 hover:text-white",
+        props.disabled ? "bg-red-600 text-white" : "text-red-600",
         className
       )}
     >
@@ -161,18 +162,13 @@ export function DeleteButton({ children, className, ...props }: ButtonProps) {
   );
 }
 
-export function PrimaryButton({
-  children,
-  className,
-  disabled,
-  ...props
-}: ButtonProps) {
+export function PrimaryButton({ children, className, ...props }: ButtonProps) {
   return (
     <Button
       {...props}
       className={classNames(
         "text-white bg-primary hover:bg-primary-light",
-        disabled ? "bg-primary-light" : "",
+        props.disabled ? "bg-primary-light" : "",
         className
       )}
     >
