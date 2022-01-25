@@ -257,7 +257,7 @@ type IngredientRowProps = {
 };
 function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
   const isNew = ingredient.id === "";
-  const [formValues, setFormValues] = React.useState(ingredient);
+  const { formValues, setValue, ifChanged } = useForm(ingredient);
   const fetcher = useFetcher();
   const amountRef = useFocusOnce(isNew);
 
@@ -291,15 +291,14 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
     );
   };
 
-  const onBlur = (name: "name" | "amount") => {
-    if (ingredient[name] !== formValues[name]) {
+  const onBlur = (name: "name" | "amount") =>
+    ifChanged(name, () => {
       if (isNew && name === "name") {
         create();
       } else {
         save();
       }
-    }
-  };
+    });
 
   const isCreating =
     fetcher.submission?.formData.get("_action") === "add-ingredient";
@@ -311,12 +310,7 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
           name={`ingredient.${ingredient.id}.amount`}
           inputRef={amountRef}
           value={formValues.amount}
-          onChange={(e) =>
-            setFormValues((values) => ({
-              ...values,
-              amount: e.target.value,
-            }))
-          }
+          onChange={(e) => setValue("amount", e.target.value)}
           placeholder="---"
           onBlur={() => onBlur("amount")}
           onEnter={(e) => {
@@ -332,12 +326,7 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
           name={`ingredient.${ingredient.id}.name`}
           placeholder="---"
           value={formValues.name}
-          onChange={(e) =>
-            setFormValues((values) => ({
-              ...values,
-              name: e.target.value,
-            }))
-          }
+          onChange={(e) => setValue("name", e.target.value)}
           onBlur={() => onBlur("name")}
           onEnter={(e) => {
             e.preventDefault();
