@@ -4,13 +4,8 @@ import {
 } from "remix";
 import invariant from "tiny-invariant";
 
-export async function parseStringFormData(formData: FormData) {
-  const obj: { [key: string]: string | undefined } = {};
-  for (const [key, value] of formData.entries()) {
-    invariant(typeof value === "string", `expected string value for ${key}`);
-    obj[key] = value;
-  }
-  return obj;
+export async function parseStringFormData(request: Request) {
+  return Object.fromEntries(new URLSearchParams(await request.text()));
 }
 
 const uploadHandler = unstable_createFileUploadHandler({
@@ -24,5 +19,5 @@ export async function parseRecipieFormData(request: Request) {
     request,
     uploadHandler
   );
-  return parseStringFormData(formData);
+  return formData;
 }

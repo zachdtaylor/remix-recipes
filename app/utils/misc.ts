@@ -50,20 +50,20 @@ export function useFocusOnce(condition: boolean) {
 }
 
 export function useForm(initialValues: { [key: string]: any }) {
-  const [formValues, setFormValues] = React.useState(initialValues);
+  const [values, setValues] = React.useState(initialValues);
 
   const setValue = (name: string, value: any) => {
-    setFormValues((values) => ({
+    setValues((values) => ({
       ...values,
       [name]: value,
     }));
   };
 
   const ifChanged = (name: string, callback: () => void) => {
-    if (formValues[name] !== initialValues[name]) {
+    if (values[name] !== initialValues[name]) {
       callback();
     }
   };
 
-  return { formValues, setValue, ifChanged };
+  return { values, setValue, ifChanged };
 }

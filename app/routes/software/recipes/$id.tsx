@@ -2,7 +2,7 @@ import type {
   Ingredient as IngredientType,
   Recipe as RecipeType,
 } from "@prisma/client";
-import type { LoaderFunction, ActionFunction } from "remix";
+import { LoaderFunction, ActionFunction, useParams } from "remix";
 
 import React from "react";
 import {
@@ -15,8 +15,8 @@ import {
   useFetcher,
   useTransition,
 } from "remix";
-import invariant from "tiny-invariant";
 
+import * as RecipeController from "~/controllers/recipe-controller";
 import { TextArea, TextInput } from "~/components/forms";
 import { Heading2 } from "~/components/heading";
 import {
@@ -28,20 +28,19 @@ import {
 import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
-import { parseRecipieFormData } from "~/utils/http";
+import { parseRecipieFormData, parseStringFormData } from "~/utils/http";
 import {
   formatDateTime,
+  isEmpty,
   maxDate,
   useFocusOnce,
   useForm,
   useMounted,
 } from "~/utils/misc";
-import { validateRecipe } from "~/utils/validation";
 
-type PickedIngredient = Pick<IngredientType, "id" | "amount" | "name">;
 type LoaderData = {
   recipe: RecipeType & {
-    ingredients: Array<PickedIngredient>;
+    ingredients: Array<IngredientType>;
   };
   updatedAt: string;
 };
@@ -66,40 +65,16 @@ export const loader: LoaderFunction = async ({ params }) => {
   };
 };
 
-function saveRecipie(
-  recipeId: string,
-  formData: { [key: string]: string | undefined }
-) {
-  const recipiePromise = Recipe.updateRecipe(recipeId, {
-    name: formData.name,
-    totalTime: formData.totalTime,
-    instructions: formData.instructions,
-    image: formData.image,
-  });
-  const ingredientPromises = Object.keys(formData)
-    .filter((key) => {
-      const [inputType, id, _] = key.split(".");
-      return inputType === "ingredient" && id !== "";
-    })
-    .map((key) => {
-      const [_, id, name] = key.split(".");
-      invariant(
-        name === "amount" || name === "name",
-        `invalid form input name ${key}`
-      );
-      return Ingredient.createOrUpdateIngredient(recipeId, id, {
-        [name]: formData[key],
-      });
-    });
-  return Promise.all([recipiePromise, ...ingredientPromises]);
-}
-
 export const action: ActionFunction = async ({ params, request }) => {
   const recipeId = params.id;
   if (typeof recipeId === "undefined") {
     return null;
   }
-  const formData = await parseRecipieFormData(request);
+  const formData = await parseStringFormData(request);
+  const errors = RecipeController.validateRecipe(formData);
+  if (!isEmpty(errors)) {
+    return { id: recipeId, errors };
+  }
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(recipeId);
     return redirect("/software/recipes");
@@ -114,28 +89,31 @@ export const action: ActionFunction = async ({ params, request }) => {
     const ingredientId = formData._action.split(".")[1];
     return Ingredient.deleteIngredient(ingredientId);
   }
-  // const errors = validateRecipe(formData);
-  // if (!isEmpty(errors)) {
-  //   return { id, errors };
-  // }
-  return saveRecipie(recipeId, formData);
+  return RecipeController.saveRecipie(recipeId, formData);
 };
 
 export default function RecipeRoute() {
+  const params = useParams();
+  return <RecipeRouteComponent key={params.id} />;
+}
+
+function RecipeRouteComponent() {
   const data = useLoaderData<LoaderData>();
-  const { formValues, setValue, ifChanged } = useForm({
+  const fetcher = useFetcher();
+  const form = useForm({
     name: data.recipe.name,
     totalTime: data.recipe.totalTime,
     instructions: data.recipe.instructions,
   });
-  const fetcher = useFetcher();
   const transition = useTransition();
   const mounted = useMounted();
+  const [hasCreated, setHasCreated] = React.useState(false);
+  const [newRows, setNewRows] = React.useState(1);
   const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
 
   const save = () => {
     return fetcher.submit(
-      { _action: "save", ...formValues },
+      { _action: "save", ...form.values },
       { method: "post" }
     );
   };
@@ -150,10 +128,10 @@ export default function RecipeRoute() {
         inputKey={data.recipe.id}
         name="name"
         placeholder="Recipie Name"
-        value={formValues.name}
-        onChange={(e) => setValue("name", e.target.value)}
-        onBlur={() => ifChanged("name", save)}
-        error={fetcher.data?.id === data.recipe.id && fetcher.data?.errors.name}
+        value={form.values.name}
+        onChange={(e) => form.setValue("name", e.target.value)}
+        onBlur={() => form.ifChanged("name", save)}
+        error={fetcher.data?.errors?.name}
         className="text-2xl font-extrabold mb-2 w-full"
       />
       <div className="flex justify-between items-center">
@@ -163,13 +141,10 @@ export default function RecipeRoute() {
             inputKey={data.recipe.id}
             name="totalTime"
             placeholder="Time"
-            value={formValues.totalTime}
-            onChange={(e) => setValue("totalTime", e.target.value)}
-            onBlur={() => ifChanged("totalTime", save)}
-            error={
-              fetcher.data?.id === data.recipe.id &&
-              fetcher.data?.errors.totalTime
-            }
+            value={form.values.totalTime}
+            onChange={(e) => form.setValue("totalTime", e.target.value)}
+            onBlur={() => form.ifChanged("totalTime", save)}
+            error={fetcher.data?.errors?.totalTime}
             className="ml-1"
           />
         </div>
@@ -198,14 +173,21 @@ export default function RecipeRoute() {
               />
             )
           )}
-          <IngredientRow
-            key={data.recipe.ingredients.length}
-            ingredient={{
-              id: "",
-              name: "",
-              amount: "",
-            }}
-          />
+          {Array.from(Array(newRows)).map((_, index) => (
+            <NewIngredientRow
+              key={index}
+              ingredient={{
+                id: "",
+                name: "",
+                amount: "",
+              }}
+              focusWhen={hasCreated}
+              onCreate={() => {
+                setHasCreated(true);
+                setNewRows((n) => n + 1);
+              }}
+            />
+          ))}
         </tbody>
       </table>
       <Heading2 className="mb-2">Instructions</Heading2>
@@ -213,9 +195,10 @@ export default function RecipeRoute() {
         key={data.recipe.id}
         name="instructions"
         placeholder="Instructions"
-        value={formValues.instructions}
-        onChange={(e) => setValue("instructions", e.target.value)}
-        onBlur={() => ifChanged("instructions", save)}
+        value={form.values.instructions}
+        onChange={(e) => form.setValue("instructions", e.target.value)}
+        onBlur={() => form.ifChanged("instructions", save)}
+        error={fetcher.data?.errors?.instructions}
       />
       <hr className="my-4" />
       <div className="flex justify-between">
@@ -251,33 +234,21 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
 };
 
 type IngredientRowProps = {
-  ingredient: PickedIngredient;
+  ingredient: IngredientType;
   onDelete?: () => void;
-  onCreate?: () => void;
 };
-function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
-  const isNew = ingredient.id === "";
-  const { formValues, setValue, ifChanged } = useForm(ingredient);
+function IngredientRow({ ingredient, onDelete }: IngredientRowProps) {
+  const form = useForm(ingredient);
   const fetcher = useFetcher();
-  const amountRef = useFocusOnce(isNew);
 
   const save = () => {
     const name = `ingredient.${ingredient.id}.name`;
     const amount = `ingredient.${ingredient.id}.amount`;
     fetcher.submit(
-      { _action: "save", [name]: formValues.name, [amount]: formValues.amount },
-      { method: "post" }
-    );
-  };
-
-  const create = () => {
-    onCreate?.();
-    fetcher.submit(
       {
-        _action: "add-ingredient",
-        id: ingredient.id,
-        name: formValues.name,
-        amount: formValues.amount,
+        _action: "save",
+        [name]: form.values.name,
+        [amount]: form.values.amount,
       },
       { method: "post" }
     );
@@ -291,17 +262,89 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
     );
   };
 
+  return (
+    <tr key={ingredient.id}>
+      <td className="pr-4 py-1">
+        <TextInput
+          name={`ingredient.${ingredient.id}.amount`}
+          value={form.values.amount}
+          onChange={(e) => form.setValue("amount", e.target.value)}
+          placeholder="---"
+          onBlur={() => form.ifChanged("amount", save)}
+          onEnter={(e) => {
+            e.preventDefault();
+            save();
+          }}
+          className="w-full"
+        />
+      </td>
+      <td className="pr-4 py-1">
+        <TextInput
+          name={`ingredient.${ingredient.id}.name`}
+          placeholder="---"
+          value={form.values.name}
+          onChange={(e) => form.setValue("name", e.target.value)}
+          onBlur={() => form.ifChanged("name", save)}
+          onEnter={(e) => {
+            e.preventDefault();
+            save();
+          }}
+          className="w-full"
+        />
+      </td>
+      <td className="text-right py-1">
+        <button
+          name="_action"
+          value={`delete-ingredient.${ingredient.id}`}
+          onClick={deleteIngredient}
+        >
+          <TrashIcon />
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+type NewIngredientRowProps = {
+  ingredient: Pick<IngredientType, "id" | "name" | "amount">;
+  onCreate: () => void;
+  focusWhen: boolean;
+};
+function NewIngredientRow({
+  ingredient,
+  onCreate,
+  focusWhen,
+}: NewIngredientRowProps) {
+  const form = useForm(ingredient);
+  const fetcher = useFetcher();
+  const amountRef = useFocusOnce(focusWhen);
+
+  const create = () => {
+    onCreate();
+    fetcher.submit(
+      {
+        _action: "add-ingredient",
+        id: ingredient.id,
+        name: form.values.name,
+        amount: form.values.amount,
+      },
+      { method: "post" }
+    );
+  };
+
   const onBlur = (name: "name" | "amount") =>
-    ifChanged(name, () => {
-      if (isNew && name === "name") {
+    form.ifChanged(name, () => {
+      if (name === "name") {
         create();
-      } else {
-        save();
       }
     });
 
   const isCreating =
     fetcher.submission?.formData.get("_action") === "add-ingredient";
+
+  if (fetcher.type === "done") {
+    return null;
+  }
 
   return (
     <tr key={ingredient.id}>
@@ -309,8 +352,8 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
         <TextInput
           name={`ingredient.${ingredient.id}.amount`}
           inputRef={amountRef}
-          value={formValues.amount}
-          onChange={(e) => setValue("amount", e.target.value)}
+          value={form.values.amount}
+          onChange={(e) => form.setValue("amount", e.target.value)}
           placeholder="---"
           onBlur={() => onBlur("amount")}
           onEnter={(e) => {
@@ -325,8 +368,8 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
         <TextInput
           name={`ingredient.${ingredient.id}.name`}
           placeholder="---"
-          value={formValues.name}
-          onChange={(e) => setValue("name", e.target.value)}
+          value={form.values.name}
+          onChange={(e) => form.setValue("name", e.target.value)}
           onBlur={() => onBlur("name")}
           onEnter={(e) => {
             e.preventDefault();
@@ -339,19 +382,11 @@ function IngredientRow({ ingredient, onCreate, onDelete }: IngredientRowProps) {
       <td className="text-right py-1">
         <button
           name="_action"
-          value={
-            isNew ? "add-ingredient" : `delete-ingredient.${ingredient.id}`
-          }
+          value="add-ingredient"
           disabled={isCreating}
-          onClick={isNew ? create : deleteIngredient}
+          onClick={create}
         >
-          {isCreating ? (
-            <ThreeDotsIcon />
-          ) : isNew ? (
-            <SaveIcon />
-          ) : (
-            <TrashIcon />
-          )}
+          {isCreating ? <ThreeDotsIcon /> : <SaveIcon />}
         </button>
       </td>
     </tr>

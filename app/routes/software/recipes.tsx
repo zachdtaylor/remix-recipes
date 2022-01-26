@@ -88,7 +88,10 @@ export default function Recipes() {
 
             const optimisticData = new Map();
             for (const fetcher of fetchers) {
-              if (fetcher.submission?.action?.includes(recipe.id)) {
+              if (
+                fetcher.submission?.action?.includes(recipe.id) &&
+                fetcher.submission.formData.get("_action") === "save"
+              ) {
                 if (fetcher.submission.formData.has("name")) {
                   optimisticData.set(
                     "name",
