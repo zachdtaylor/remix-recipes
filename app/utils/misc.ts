@@ -22,17 +22,11 @@ export function formatDateTime(dateStr: string) {
   return format(date, "MMM dd, yyyy h:mm:ss aaa");
 }
 
-export function useMounted() {
-  const mounted = React.useRef(false);
-
-  React.useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
-  return mounted.current;
+export function useHydrated() {
+  if (typeof window !== "undefined") {
+    return true;
+  }
+  return false;
 }
 
 export function useFocusOnce(condition: boolean) {

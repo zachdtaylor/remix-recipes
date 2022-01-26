@@ -39,7 +39,7 @@ import {
   maxDate,
   useFocusOnce,
   useForm,
-  useMounted,
+  useHydrated,
 } from "~/utils/misc";
 
 type LoaderData = {
@@ -110,7 +110,7 @@ function RecipeRouteComponent() {
     instructions: data.recipe.instructions,
   });
   const transition = useTransition();
-  const mounted = useMounted();
+  const hydrated = useHydrated();
   const [hasCreated, setHasCreated] = React.useState(false);
   const [newRows, setNewRows] = React.useState(1);
   const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
@@ -206,7 +206,7 @@ function RecipeRouteComponent() {
       />
       <hr className="my-4" />
       <div className="flex justify-between">
-        {mounted ? (
+        {hydrated ? (
           `Autosaved at ${formatDateTime(data.updatedAt)}`
         ) : (
           <PrimaryButton name="_action" value="save">
