@@ -2,18 +2,22 @@ import type {
   Ingredient as IngredientType,
   Recipe as RecipeType,
 } from "@prisma/client";
-import { LoaderFunction, ActionFunction, useParams } from "remix";
+import type {
+  ErrorBoundaryComponent,
+  LoaderFunction,
+  ActionFunction,
+} from "remix";
 
 import React from "react";
 import {
   useLoaderData,
   json,
   useCatch,
-  ErrorBoundaryComponent,
   redirect,
   Form,
   useFetcher,
   useTransition,
+  useParams,
 } from "remix";
 
 import * as RecipeController from "~/controllers/recipe-controller";
@@ -28,7 +32,7 @@ import {
 import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
-import { parseRecipieFormData, parseStringFormData } from "~/utils/http";
+import { parseStringFormData } from "~/utils/http";
 import {
   formatDateTime,
   isEmpty,
@@ -71,10 +75,6 @@ export const action: ActionFunction = async ({ params, request }) => {
     return null;
   }
   const formData = await parseStringFormData(request);
-  const errors = RecipeController.validateRecipe(formData);
-  if (!isEmpty(errors)) {
-    return { id: recipeId, errors };
-  }
   if (formData._action === "delete") {
     await Recipe.deleteRecipe(recipeId);
     return redirect("/software/recipes");
@@ -88,6 +88,10 @@ export const action: ActionFunction = async ({ params, request }) => {
   if (formData._action?.includes("delete-ingredient")) {
     const ingredientId = formData._action.split(".")[1];
     return Ingredient.deleteIngredient(ingredientId);
+  }
+  const errors = RecipeController.validateRecipe(formData);
+  if (!isEmpty(errors)) {
+    return { id: recipeId, errors };
   }
   return RecipeController.saveRecipie(recipeId, formData);
 };
