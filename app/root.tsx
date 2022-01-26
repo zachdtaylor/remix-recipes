@@ -138,7 +138,7 @@ function AppNavLink({
 }) {
   return (
     <li className="w-16">
-      <NavLink to={to} className="w-16">
+      <NavLink to={to} className="w-16" reloadDocument>
         {({ isActive }) => (
           <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
             {children}
