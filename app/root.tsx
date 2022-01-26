@@ -1,5 +1,4 @@
 import {
-  Link,
   Links,
   LiveReload,
   Meta,
@@ -41,6 +40,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function App() {
   const userId = useLoaderData();
+
   return (
     <html lang="en">
       <head>

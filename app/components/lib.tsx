@@ -3,8 +3,18 @@ import { Link, NavLink } from "remix";
 import { classNames } from "~/utils/misc";
 import { TimeIcon } from "./icons";
 
-export function PageWrapper({ children }: { children: React.ReactNode }) {
-  return <div className="px-4 pt-8 h-full flex flex-col">{children}</div>;
+export function PageWrapper({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className={classNames("px-4 pt-8 h-full flex flex-col", className)}>
+      {children}
+    </div>
+  );
 }
 
 type PageTitleProps = {

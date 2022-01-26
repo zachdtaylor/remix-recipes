@@ -35,6 +35,17 @@ export function getRecipe(id?: string) {
   });
 }
 
+export function getRecipes() {
+  return db.recipe.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      user: true,
+    },
+  });
+}
+
 export function searchRecipes(userId: string, query: string | null) {
   return db.recipe.findMany({
     where: {
