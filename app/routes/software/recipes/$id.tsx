@@ -104,16 +104,16 @@ export default function RecipeRoute() {
 function RecipeRouteComponent() {
   const data = useLoaderData<LoaderData>();
   const fetcher = useFetcher();
-  const form = useForm({
-    name: data.recipe.name,
-    totalTime: data.recipe.totalTime,
-    instructions: data.recipe.instructions,
-  });
   const transition = useTransition();
   const hydrated = useHydrated();
   const [hasCreated, setHasCreated] = React.useState(false);
   const [newRows, setNewRows] = React.useState(1);
   const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
+  const form = useForm({
+    name: data.recipe.name,
+    totalTime: data.recipe.totalTime,
+    instructions: data.recipe.instructions,
+  });
 
   const save = () => {
     return fetcher.submit(
@@ -267,45 +267,15 @@ function IngredientRow({ ingredient, onDelete }: IngredientRowProps) {
   };
 
   return (
-    <tr key={ingredient.id}>
-      <td className="pr-4 py-1">
-        <TextInput
-          name={`ingredient.${ingredient.id}.amount`}
-          value={form.values.amount}
-          onChange={(e) => form.setValue("amount", e.target.value)}
-          placeholder="---"
-          onBlur={() => form.ifChanged("amount", save)}
-          onEnter={(e) => {
-            e.preventDefault();
-            save();
-          }}
-          className="w-full"
-        />
-      </td>
-      <td className="pr-4 py-1">
-        <TextInput
-          name={`ingredient.${ingredient.id}.name`}
-          placeholder="---"
-          value={form.values.name}
-          onChange={(e) => form.setValue("name", e.target.value)}
-          onBlur={() => form.ifChanged("name", save)}
-          onEnter={(e) => {
-            e.preventDefault();
-            save();
-          }}
-          className="w-full"
-        />
-      </td>
-      <td className="text-right py-1">
-        <button
-          name="_action"
-          value={`delete-ingredient.${ingredient.id}`}
-          onClick={deleteIngredient}
-        >
-          <TrashIcon />
-        </button>
-      </td>
-    </tr>
+    <IngredientRowContent
+      ingredient={ingredient}
+      form={form}
+      onBlurAmount={() => form.ifChanged("amount", save)}
+      onBlurName={() => form.ifChanged("name", save)}
+      onEnter={save}
+      buttonContent={<TrashIcon />}
+      onClickButton={deleteIngredient}
+    />
   );
 }
 
@@ -351,7 +321,44 @@ function NewIngredientRow({
   }
 
   return (
-    <tr key={ingredient.id}>
+    <IngredientRowContent
+      ingredient={ingredient}
+      amountRef={amountRef}
+      form={form}
+      onBlurAmount={() => onBlur("amount")}
+      onBlurName={() => onBlur("name")}
+      onEnter={create}
+      disabled={isCreating}
+      buttonContent={isCreating ? <ThreeDotsIcon /> : <SaveIcon />}
+      onClickButton={create}
+    />
+  );
+}
+
+type IngredientRowContentProps = {
+  ingredient: Pick<IngredientType, "id" | "name" | "amount">;
+  amountRef?: React.MutableRefObject<HTMLInputElement | null>;
+  form: ReturnType<typeof useForm>;
+  onEnter: () => void;
+  disabled?: boolean;
+  onBlurAmount: () => void;
+  onBlurName: () => void;
+  onClickButton: () => void;
+  buttonContent: React.ReactNode;
+};
+function IngredientRowContent({
+  ingredient,
+  amountRef,
+  form,
+  onEnter,
+  disabled,
+  onBlurAmount,
+  onBlurName,
+  buttonContent,
+  onClickButton,
+}: IngredientRowContentProps) {
+  return (
+    <tr>
       <td className="pr-4 py-1">
         <TextInput
           name={`ingredient.${ingredient.id}.amount`}
@@ -359,13 +366,13 @@ function NewIngredientRow({
           value={form.values.amount}
           onChange={(e) => form.setValue("amount", e.target.value)}
           placeholder="---"
-          onBlur={() => onBlur("amount")}
+          onBlur={onBlurAmount}
           onEnter={(e) => {
             e.preventDefault();
-            create();
+            onEnter();
           }}
           className="w-full"
-          disabled={isCreating}
+          disabled={disabled}
         />
       </td>
       <td className="pr-4 py-1">
@@ -374,23 +381,23 @@ function NewIngredientRow({
           placeholder="---"
           value={form.values.name}
           onChange={(e) => form.setValue("name", e.target.value)}
-          onBlur={() => onBlur("name")}
+          onBlur={onBlurName}
           onEnter={(e) => {
             e.preventDefault();
-            create();
+            onEnter();
           }}
           className="w-full"
-          disabled={isCreating}
+          disabled={disabled}
         />
       </td>
       <td className="text-right py-1">
         <button
           name="_action"
           value="add-ingredient"
-          disabled={isCreating}
-          onClick={create}
+          disabled={disabled}
+          onClick={onClickButton}
         >
-          {isCreating ? <ThreeDotsIcon /> : <SaveIcon />}
+          {buttonContent}
         </button>
       </td>
     </tr>
