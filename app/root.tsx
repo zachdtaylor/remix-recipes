@@ -53,7 +53,7 @@ export default function App() {
         <div className="root-container md:flex md:h-screen">
           <nav className="flex justify-between shrink-0 w-full md:flex-col md:w-16">
             <ul className="flex md:flex-col">
-              <AppNavLink to="/home">
+              <AppNavLink to="/discover">
                 <HomeIcon />
               </AppNavLink>
               {userId ? (

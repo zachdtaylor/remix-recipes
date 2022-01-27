@@ -1,5 +1,5 @@
 import { redirect } from "remix";
 
 export const loader = () => {
-  return redirect("/home");
+  return redirect("/discover");
 };
