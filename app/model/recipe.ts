@@ -1,5 +1,6 @@
 import { Recipe } from "@prisma/client";
 import { db } from "~/utils/db";
+import { randomImage } from "~/utils/misc";
 
 export function createRecipe(userId: string) {
   return db.recipe.create({
@@ -7,7 +8,7 @@ export function createRecipe(userId: string) {
       userId,
       name: "New Recipe",
       totalTime: "0 min",
-      image: "",
+      image: randomImage(),
       instructions: "How do you make this recipe?",
     },
   });
@@ -58,6 +59,7 @@ export function searchRecipes(userId: string, query: string | null) {
     orderBy: {
       createdAt: "desc",
     },
+    take: 10,
   });
 }
 

@@ -29,6 +29,18 @@ export function useHydrated() {
   return false;
 }
 
+export function randomImage() {
+  const images = [
+    "/images/alfredo-pasta.jpeg",
+    "/images/generic-food-pic.jpeg",
+    "/images/cookies.jpeg",
+    "/images/pancakes.jpeg",
+    "/images/chocolate-chili.jpeg",
+  ];
+  const index = Math.floor(Math.random() * images.length);
+  return images[index];
+}
+
 export function useFocusOnce(condition: boolean) {
   const ref = React.useRef<HTMLInputElement>(null);
   const [focusCalled, setFocusCalled] = React.useState(false);

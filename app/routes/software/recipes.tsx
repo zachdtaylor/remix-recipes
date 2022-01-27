@@ -121,6 +121,7 @@ export default function Recipes() {
                     <RecipeCard
                       title={`${title}${isLoading ? "..." : ""}`}
                       totalTime={totalTime}
+                      image={recipe.image}
                       isActive={isActive}
                       isLoading={isLoading}
                     />

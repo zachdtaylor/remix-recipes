@@ -6,4 +6,4 @@ node_modules
 /app/tailwind.css
 .env
 
-generic-food-pic.jpeg
+/public/images

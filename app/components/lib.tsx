@@ -73,12 +73,14 @@ export function PageContent({ children }: { children: React.ReactNode }) {
 type RecipeCardProps = {
   title: string;
   totalTime: string;
+  image?: string;
   isActive: boolean;
   isLoading: boolean;
 };
 export function RecipeCard({
   title,
   totalTime,
+  image,
   isActive,
   isLoading,
 }: RecipeCardProps) {
@@ -86,20 +88,25 @@ export function RecipeCard({
     <div
       className={classNames(
         "group",
-        "p-4 shadow-md rounded-md border-2 border-white",
+        "flex shadow-md rounded-md border-2 border-white",
         "hover:text-primary hover:border-primary",
         isActive ? "border-primary text-primary" : "",
         isLoading ? "border-gray-500 text-gray-500" : ""
       )}
     >
-      <h3 className="font-semibold mb-1">{title}</h3>
-      <RecipeTime
-        totalTime={totalTime}
-        className={classNames(
-          "group-hover:text-primary-light",
-          isActive ? "text-primary-light" : "text-gray-500"
-        )}
-      />
+      <div className="w-1/6 h-14 rounded-full overflow-hidden my-4 ml-3">
+        <img src={image} className="object-cover h-full w-full" />
+      </div>
+      <div className="p-4">
+        <h3 className="font-semibold mb-1">{title}</h3>
+        <RecipeTime
+          totalTime={totalTime}
+          className={classNames(
+            "group-hover:text-primary-light",
+            isActive ? "text-primary-light" : "text-gray-500"
+          )}
+        />
+      </div>
     </div>
   );
 }

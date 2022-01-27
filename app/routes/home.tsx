@@ -26,8 +26,11 @@ export default function Home() {
         {data.recipes.map((recipe) => (
           <li key={recipe.id} className="shadow-md rounded-md">
             <Link to={recipe.id}>
-              <div className="h-2/3 overflow-hidden">
-                <img src="/generic-food-pic.jpeg" className="object-cover" />
+              <div className="h-48 overflow-hidden">
+                <img
+                  src={recipe.image}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="p-4">
                 <h1 className="font-bold text-xl pb-2">{recipe.name}</h1>
