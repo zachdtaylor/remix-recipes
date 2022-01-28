@@ -43,3 +43,7 @@ export default function Home() {
     </PageWrapper>
   );
 }
+
+export const handle = {
+  hydrate: false,
+};

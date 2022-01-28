@@ -19,6 +19,7 @@ import styles from "./styles/root.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
 import { LinkButton } from "./components/lib";
+import { useShouldHydrate } from "./utils/misc";
 
 export const links: LinksFunction = () => {
   return [
@@ -40,6 +41,7 @@ export const loader: LoaderFunction = async ({ request }) => {
 
 export default function App() {
   const userId = useLoaderData();
+  const shouldHydrate = useShouldHydrate();
 
   return (
     <html lang="en">
@@ -79,7 +81,7 @@ export default function App() {
           </div>
         </div>
         <ScrollRestoration />
-        <Scripts />
+        {shouldHydrate ? <Scripts /> : null}
         {process.env.NODE_ENV === "development" && <LiveReload />}
       </body>
     </html>

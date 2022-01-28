@@ -38,7 +38,7 @@ export default function DiscoverRecipe() {
       <div className="md:flex">
         <img
           src={data.recipe.image}
-          className="rounded-md shadow-md mb-8 md:max-h-96"
+          className="rounded-md shadow-md mb-8 sm:aspect-square sm:object-cover sm:w-1/2 lg:w-1/3"
         />
         <div className="md:pl-4">
           <Heading2>Ingredients</Heading2>
@@ -47,10 +47,18 @@ export default function DiscoverRecipe() {
               <li className="py-1">{`${ingredient.amount.trim()} ${ingredient.name.trim()}`}</li>
             ))}
           </ul>
-          <Heading2>Instructions</Heading2>
-          <p className="py-4">{data.recipe.instructions}</p>
+          <Heading2 className="pb-4">Instructions</Heading2>
+          {data.recipe.instructions
+            .split("\n")
+            .map((paragraph) =>
+              paragraph === "" ? null : <p className="pb-6">{paragraph}</p>
+            )}
         </div>
       </div>
     </PageWrapper>
   );
 }
+
+export const handle = {
+  hydrate: false,
+};

@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import React from "react";
+import { useMatches } from "remix";
 
 export function classNames(...names: Array<string | undefined>) {
   const reduced = names.reduce(
@@ -72,4 +73,9 @@ export function useForm(initialValues: { [key: string]: any }) {
   };
 
   return { values, setValue, ifChanged };
+}
+
+export function useShouldHydrate() {
+  const matches = useMatches();
+  return !matches.some((match) => match.handle?.hydrate === false);
 }
