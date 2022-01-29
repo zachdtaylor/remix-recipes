@@ -114,8 +114,9 @@ export function sendMagicLinkEmail(email: string) {
       subject: "Log in to Remix Recipes!",
       html,
     });
+  } else {
+    console.log("Here's your magic link:", link);
   }
-  console.log("Here's your magic link:", link);
 }
 
 function isMagicLinkPayload(obj: any): obj is MagicLinkPayload {
