@@ -54,7 +54,7 @@ export default function Recipes() {
     <div className="lg:flex h-full">
       <div
         className={classNames(
-          "lg:block lg:w-1/3 lg:pr-8 overflow-auto",
+          "lg:block lg:w-1/3 lg:pr-4 overflow-auto",
           params.id ? "hidden" : ""
         )}
       >
@@ -133,7 +133,7 @@ export default function Recipes() {
         </ul>
         <br />
       </div>
-      <div className="lg:w-2/3 overflow-auto pr-4">
+      <div className="lg:w-2/3 overflow-auto pr-4 pl-4">
         <Outlet />
       </div>
     </div>
