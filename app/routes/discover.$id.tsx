@@ -1,10 +1,16 @@
-import { LoaderFunction, useLoaderData, json } from "remix";
+import { LoaderFunction, useLoaderData, json, HeadersFunction } from "remix";
 import invariant from "tiny-invariant";
 import { Heading2 } from "~/components/heading";
 import { TimeIcon } from "~/components/icons";
 import { PageTitle, PageWrapper } from "~/components/lib";
 
 import * as Recipe from "~/model/recipe";
+
+export const headers: HeadersFunction = () => {
+  return {
+    "Cache-Control": "max-age=60",
+  };
+};
 
 type LoaderData = {
   recipe: Awaited<ReturnType<typeof Recipe.getRecipe>>;
