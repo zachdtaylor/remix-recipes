@@ -13,7 +13,6 @@ import {
 import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
 import { BookIcon, HomeIcon, LoginIcon, LogoutIcon } from "~/components/icons";
 import tailwindStyles from "./tailwind.css";
-import theme from "./styles/theme.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
 import { LinkButton } from "./components/forms";
@@ -21,7 +20,7 @@ import { useShouldHydrate } from "./utils/misc";
 
 export const links: LinksFunction = () => {
   return [
-    { rel: "stylesheet", href: theme },
+    { rel: "stylesheet", href: "/theme.css" },
     { rel: "stylesheet", href: tailwindStyles },
   ];
 };
