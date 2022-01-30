@@ -11,7 +11,13 @@ import {
   useLoaderData,
 } from "remix";
 import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
-import { BookIcon, HomeIcon, LoginIcon, LogoutIcon } from "~/components/icons";
+import {
+  BookIcon,
+  HomeIcon,
+  LoginIcon,
+  LogoutIcon,
+  SettingsIcon,
+} from "~/components/icons";
 import tailwindStyles from "./tailwind.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
@@ -54,9 +60,14 @@ export default function App() {
                 <HomeIcon />
               </AppNavLink>
               {userId ? (
-                <AppNavLink to="/software">
-                  <BookIcon />
-                </AppNavLink>
+                <>
+                  <AppNavLink to="/software">
+                    <BookIcon />
+                  </AppNavLink>
+                  <AppNavLink to="/settings">
+                    <SettingsIcon />
+                  </AppNavLink>
+                </>
               ) : null}
             </ul>
             <ul>
