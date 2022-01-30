@@ -14,8 +14,6 @@ import type { MetaFunction, LinksFunction, LoaderFunction } from "remix";
 import { BookIcon, HomeIcon, LoginIcon, LogoutIcon } from "~/components/icons";
 import tailwindStyles from "./tailwind.css";
 import theme from "./styles/theme.css";
-import sharedStyles from "./styles/shared.css";
-import styles from "./styles/root.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
 import { LinkButton } from "./components/forms";
@@ -24,9 +22,7 @@ import { useShouldHydrate } from "./utils/misc";
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: theme },
-    { rel: "stylesheet", href: styles },
     { rel: "stylesheet", href: tailwindStyles },
-    { rel: "stylesheet", href: sharedStyles },
   ];
 };
 
@@ -52,8 +48,8 @@ export default function App() {
         <Links />
       </head>
       <body className="text-gray-800">
-        <div className="root-container md:flex md:h-screen">
-          <nav className="flex justify-between shrink-0 w-full md:flex-col md:w-16">
+        <div className="md:flex md:h-screen">
+          <nav className="flex justify-between shrink-0 w-full bg-primary text-white md:flex-col md:w-16">
             <ul className="flex md:flex-col">
               <AppNavLink to="/discover">
                 <HomeIcon />
@@ -142,7 +138,11 @@ function AppNavLink({
     <li className="w-16">
       <NavLink to={to} className="w-16" reloadDocument>
         {({ isActive }) => (
-          <div className={`app-nav-link ${isActive ? "-active" : ""}`}>
+          <div
+            className={`py-4 text-center hover:bg-primary-light ${
+              isActive ? "bg-primary-light" : ""
+            }`}
+          >
             {children}
           </div>
         )}
