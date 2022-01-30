@@ -94,7 +94,7 @@ export function RecipeCard({
         isLoading ? "border-gray-500 text-gray-500" : ""
       )}
     >
-      <div className="w-1/6 h-14 rounded-full overflow-hidden my-4 ml-3">
+      <div className="w-14 h-14 rounded-full overflow-hidden my-4 ml-3">
         <img src={image} className="object-cover h-full w-full" />
       </div>
       <div className="p-4">
