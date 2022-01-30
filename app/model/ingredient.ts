@@ -1,5 +1,5 @@
 import { Ingredient } from "@prisma/client";
-import { db } from "~/utils/db";
+import { db } from "~/utils/db.server";
 
 export function createIngredient(recipieId: string) {
   return db.ingredient.create({

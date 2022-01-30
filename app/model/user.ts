@@ -1,5 +1,5 @@
 import { User } from "@prisma/client";
-import { db } from "~/utils/db";
+import { db } from "~/utils/db.server";
 
 export function getUserByEmail(email: string) {
   return db.user.findUnique({

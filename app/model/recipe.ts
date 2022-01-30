@@ -1,5 +1,5 @@
 import { Recipe } from "@prisma/client";
-import { db } from "~/utils/db";
+import { db } from "~/utils/db.server";
 import { randomImage } from "~/utils/misc";
 
 export function createRecipe(userId: string) {
