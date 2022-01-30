@@ -5,8 +5,7 @@ import {
   ActionFunction,
   redirect,
 } from "remix";
-import { TextInput } from "~/components/forms";
-import { PrimaryButton } from "~/components/lib";
+import { TextInput, PrimaryButton } from "~/components/forms";
 import { authSession, getMagicLinkPayload } from "~/utils/auth.server";
 import { classNames } from "~/utils/misc";
 import * as User from "~/model/user";

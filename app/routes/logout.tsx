@@ -1,5 +1,5 @@
 import { json, LoaderFunction } from "remix";
-import { LinkButton } from "~/components/lib";
+import { LinkButton } from "~/components/forms";
 import { authSession } from "~/utils/auth.server";
 
 export const loader: LoaderFunction = async () => {

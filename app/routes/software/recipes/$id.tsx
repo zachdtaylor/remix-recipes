@@ -29,7 +29,8 @@ import {
   TimeIcon,
   TrashIcon,
 } from "~/components/icons";
-import { DeleteButton, ErrorSection, PrimaryButton } from "~/components/lib";
+import { ErrorSection } from "~/components/lib";
+import { DeleteButton, PrimaryButton } from "~/components/forms";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
 import { parseStringFormData } from "~/utils/http";

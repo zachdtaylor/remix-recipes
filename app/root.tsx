@@ -18,7 +18,7 @@ import sharedStyles from "./styles/shared.css";
 import styles from "./styles/root.css";
 import React from "react";
 import { getSessionUserId } from "./utils/auth.server";
-import { LinkButton } from "./components/lib";
+import { LinkButton } from "./components/forms";
 import { useShouldHydrate } from "./utils/misc";
 
 export const links: LinksFunction = () => {

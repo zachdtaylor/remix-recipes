@@ -6,7 +6,7 @@ import {
   useActionData,
 } from "remix";
 import { EmailInput } from "~/components/forms";
-import { PrimaryButton } from "~/components/lib";
+import { PrimaryButton } from "~/components/forms";
 import { getSessionUserId, sendMagicLinkEmail } from "~/utils/auth.server";
 import { isValidEmail } from "~/utils/validation";
 
