@@ -5,17 +5,23 @@ import { TimeIcon } from "~/components/icons";
 import { PageTitle, PageWrapper } from "~/components/lib";
 
 import * as Recipe from "~/model/recipe";
+import { hash } from "~/utils/cryptography.server";
 
-export const headers: HeadersFunction = () => {
-  return {
-    "Cache-Control": "max-age=60",
+export const headers: HeadersFunction = ({ loaderHeaders }) => {
+  const headers: { [key: string]: string } = {
+    "cache-control": "max-age=30",
   };
+  const etag = loaderHeaders.get("etag");
+  if (etag !== null) {
+    headers.etag = etag;
+  }
+  return headers;
 };
 
 type LoaderData = {
   recipe: Awaited<ReturnType<typeof Recipe.getRecipe>>;
 };
-export const loader: LoaderFunction = async ({ params }) => {
+export const loader: LoaderFunction = async ({ request, params }) => {
   const id = params.id;
   const recipe = await Recipe.getRecipe(id);
   if (recipe === null) {
@@ -28,7 +34,14 @@ export const loader: LoaderFunction = async ({ params }) => {
       }
     );
   }
-  return { recipe };
+  return json(
+    { recipe },
+    {
+      headers: {
+        etag: hash(JSON.stringify(recipe)),
+      },
+    }
+  );
 };
 
 export default function DiscoverRecipe() {
@@ -42,10 +55,12 @@ export default function DiscoverRecipe() {
         <p className="pl-2">{data.recipe.totalTime}</p>
       </div>
       <div className="md:flex">
-        <img
-          src={data.recipe.image}
-          className="rounded-md shadow-md mb-8 sm:aspect-square sm:object-cover sm:w-1/2 lg:w-1/3"
-        />
+        <div className="sm:w-1/2 lg:w-1/3">
+          <img
+            src={data.recipe.image}
+            className="rounded-md shadow-md mb-8 sm:aspect-square sm:object-cover"
+          />
+        </div>
         <div className="md:pl-4">
           <Heading2>Ingredients</Heading2>
           <ul className="py-4">

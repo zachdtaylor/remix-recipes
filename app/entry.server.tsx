@@ -15,6 +15,12 @@ export default function handleRequest(
 
   responseHeaders.set("Content-Type", "text/html");
 
+  const etag = responseHeaders.get("etag");
+  const ifNoneMatch = request.headers.get("if-none-match");
+  if (etag !== null && ifNoneMatch !== null && etag === ifNoneMatch) {
+    return new Response(null, { status: 304 });
+  }
+
   return new Response("<!DOCTYPE html>" + markup, {
     status: responseStatusCode,
     headers: responseHeaders,

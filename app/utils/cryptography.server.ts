@@ -40,3 +40,7 @@ export function decrypt(value: string) {
   ]);
   return decrypted.toString();
 }
+
+export function hash(value: string) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
