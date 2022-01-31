@@ -1,5 +1,5 @@
 import React from "react";
-import { Link, NavLink } from "remix";
+import { NavLink } from "remix";
 import { classNames } from "~/utils/misc";
 import { TimeIcon } from "./icons";
 
@@ -141,5 +141,24 @@ export function ErrorSection({
       <h1 className="text-2xl mb-4">{title}</h1>
       <p>{message}</p>
     </div>
+  );
+}
+
+type HeadingPropTypes = {
+  children: string;
+  className?: string;
+};
+
+export function Heading1({ children, className }: HeadingPropTypes) {
+  return (
+    <h1 className={classNames("text-2xl font-extrabold mb-2", className)}>
+      {children}
+    </h1>
+  );
+}
+
+export function Heading2({ children, className }: HeadingPropTypes) {
+  return (
+    <h2 className={classNames("text-xl font-bold", className)}>{children}</h2>
   );
 }

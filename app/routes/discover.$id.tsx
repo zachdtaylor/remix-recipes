@@ -1,8 +1,7 @@
 import { LoaderFunction, useLoaderData, json, HeadersFunction } from "remix";
 import invariant from "tiny-invariant";
-import { Heading2 } from "~/components/heading";
 import { TimeIcon } from "~/components/icons";
-import { PageTitle, PageWrapper } from "~/components/lib";
+import { PageTitle, PageWrapper, Heading2 } from "~/components/lib";
 
 import * as Recipe from "~/model/recipe";
 import { hash } from "~/utils/cryptography.server";

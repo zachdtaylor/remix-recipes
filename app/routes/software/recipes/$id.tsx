@@ -21,16 +21,19 @@ import {
 } from "remix";
 
 import * as RecipeController from "~/controllers/recipe-controller";
-import { TextArea, TextInput } from "~/components/forms";
-import { Heading2 } from "~/components/heading";
 import {
   SaveIcon,
   ThreeDotsIcon,
   TimeIcon,
   TrashIcon,
 } from "~/components/icons";
-import { ErrorSection } from "~/components/lib";
-import { DeleteButton, PrimaryButton } from "~/components/forms";
+import { Heading2, ErrorSection } from "~/components/lib";
+import {
+  DeleteButton,
+  PrimaryButton,
+  TextArea,
+  TextInput,
+} from "~/components/forms";
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
 import { parseStringFormData } from "~/utils/http";
