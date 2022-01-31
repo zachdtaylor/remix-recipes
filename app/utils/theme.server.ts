@@ -42,8 +42,8 @@ export function getTheme(name: string): Theme {
   }
   if (name === "green") {
     return {
-      primaryColor: "#097969",
-      primaryColorLight: "#52a196",
+      primaryColor: "#00743e",
+      primaryColorLight: "#4c9d77",
     };
   }
   if (name === "blue") {
@@ -59,7 +59,7 @@ export function getTheme(name: string): Theme {
     };
   }
   return {
-    primaryColor: "#097969",
-    primaryColorLight: "#52a196",
+    primaryColor: "#00743e",
+    primaryColorLight: "#4c9d77",
   };
 }
