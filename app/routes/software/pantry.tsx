@@ -4,6 +4,7 @@ import {
   Form,
   ActionFunction,
   json,
+  useActionData,
 } from "remix";
 import { TextInput } from "~/components/forms";
 import { SaveIcon, TrashIcon } from "~/components/icons";
@@ -28,7 +29,7 @@ export const action: ActionFunction = async ({ request }) => {
   const userId = session.get("userId");
   const formData = await parseStringFormData(request);
   if (formData._action === "create") {
-    if (typeof formData.name === "undefined") {
+    if (formData.name === "") {
       return json({ errors: { name: "Required" } });
     }
     return PantryItem.createPantryItem(userId, { name: formData.name });
@@ -42,6 +43,7 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Pantry() {
   const data = useLoaderData<LoaderData>();
+  const actionData = useActionData();
   return (
     <div
       className={classNames(
@@ -67,7 +69,11 @@ export default function Pantry() {
         method="post"
         className="flex justify-between border-2 border-primary p-4"
       >
-        <TextInput name="name" placeholder="Item" />
+        <TextInput
+          name="name"
+          placeholder="Item"
+          error={actionData?.errors?.name}
+        />
         <button name="_action" value="create">
           <SaveIcon />
         </button>
