@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { randomImage } from "~/utils/misc";
+import { randomImage } from "../app/utils/misc";
 const db = new PrismaClient();
 
 async function seed() {
