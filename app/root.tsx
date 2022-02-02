@@ -60,15 +60,13 @@ export default function App() {
                 <HomeIcon />
               </AppNavLink>
               {userId ? (
-                <>
-                  <AppNavLink to="/software">
-                    <BookIcon />
-                  </AppNavLink>
-                  <AppNavLink to="/settings">
-                    <SettingsIcon />
-                  </AppNavLink>
-                </>
+                <AppNavLink to="/software">
+                  <BookIcon />
+                </AppNavLink>
               ) : null}
+              <AppNavLink to="/settings">
+                <SettingsIcon />
+              </AppNavLink>
             </ul>
             <ul>
               {!userId ? (

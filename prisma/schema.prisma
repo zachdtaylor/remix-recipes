@@ -35,9 +35,19 @@ model Ingredient {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
+  id        String       @id @default(uuid())
+  email     String       @unique
   firstName String
   lastName  String
   recipes   Recipe[]
+  pantry    PantryItem[]
+}
+
+model PantryItem {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  userId    String
+  User      User     @relation(fields: [userId], references: [id])
 }

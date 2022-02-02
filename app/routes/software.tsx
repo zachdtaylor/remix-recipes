@@ -18,7 +18,12 @@ export default function Software() {
   return (
     <PageWrapper>
       <PageTitle>Software</PageTitle>
-      <PageNav links={[{ to: "recipes", label: "Recipes" }]} />
+      <PageNav
+        links={[
+          { to: "recipes", label: "Recipes" },
+          { to: "pantry", label: "Pantry" },
+        ]}
+      />
       <PageContent>
         <Outlet />
       </PageContent>
