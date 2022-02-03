@@ -20,7 +20,7 @@ model Recipe {
   image        String
   ingredients  Ingredient[]
   userId       String
-  user         User         @relation(fields: [userId], references: [id])
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Ingredient {
@@ -35,19 +35,33 @@ model Ingredient {
 }
 
 model User {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  email       String        @unique
+  firstName   String
+  lastName    String
+  recipes     Recipe[]
+  pantry      PantryShelf[]
+  pantryItems PantryItem[]
+}
+
+model PantryShelf {
   id        String       @id @default(uuid())
-  email     String       @unique
-  firstName String
-  lastName  String
-  recipes   Recipe[]
-  pantry    PantryItem[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  name      String
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     PantryItem[]
 }
 
 model PantryItem {
-  id        String   @id @default(uuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String      @id @default(uuid())
+  createdAt DateTime    @default(now())
   name      String
+  shelfId   String
+  shelf     PantryShelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
   userId    String
-  User      User     @relation(fields: [userId], references: [id])
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -53,7 +53,7 @@ export default function App() {
         <Links />
       </head>
       <body className="text-gray-800">
-        <div className="md:flex md:h-screen">
+        <div className="md:flex md:h-screen md:basis-full">
           <nav className="flex justify-between shrink-0 w-full bg-primary text-white md:flex-col md:w-16">
             <ul className="flex md:flex-col">
               <AppNavLink to="/discover">
@@ -80,7 +80,7 @@ export default function App() {
               )}
             </ul>
           </nav>
-          <div className="flex-grow">
+          <div className="flex-grow md:w-[calc(100%-4rem)]">
             <Outlet />
           </div>
         </div>

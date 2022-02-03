@@ -14,11 +14,13 @@ export function getPantryItems(userId: string) {
 
 export function createPantryItem(
   userId: string,
+  shelfId: string,
   data: Pick<PantryItem, "name">
 ) {
   return db.pantryItem.create({
     data: {
-      userId: userId,
+      userId,
+      shelfId,
       name: data.name,
     },
   });
