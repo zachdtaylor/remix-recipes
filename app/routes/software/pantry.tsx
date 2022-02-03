@@ -61,7 +61,7 @@ export default function Pantry() {
             key={shelf.id}
             className={classNames(
               "border-2 border-primary rounded-md p-4 h-fit",
-              "basis-[calc(100vw-2rem)] md:basis-96 grow-0 shrink-0"
+              "w-[calc(100vw-2rem)] md:w-96 flex-none"
             )}
           >
             <Form reloadDocument method="post" className="flex">
