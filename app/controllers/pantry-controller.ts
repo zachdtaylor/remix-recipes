@@ -11,7 +11,7 @@ export function createPantryItem(userId: string, formData: ParsedFormData) {
     return json({ errors: { shelfId: "Required" } });
   }
   return PantryItem.createPantryItem(userId, formData.shelfId, {
-    name: formData.name,
+    name: formData.name.trim(),
   });
 }
 
@@ -34,7 +34,7 @@ export function saveShelfName(formData: ParsedFormData) {
     return json({ errors: { shelfId: "Required" } });
   }
   return PantryShelf.savePantryShelf(formData.shelfId, {
-    name: formData.shelfName,
+    name: formData.shelfName.trim(),
   });
 }
 
