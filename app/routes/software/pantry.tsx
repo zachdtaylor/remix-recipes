@@ -31,22 +31,20 @@ export const action: ActionFunction = async ({ request }) => {
   const session = await requireAuthSession(request);
   const userId = session.get("userId");
   const formData = await parseStringFormData(request);
-  if (formData._action === "create-item") {
-    return PantryController.createPantryItem(userId, formData);
+  switch (formData._action) {
+    case "create-item":
+      return PantryController.createPantryItem(userId, formData);
+    case "delete-item":
+      return PantryController.deletePantryItem(formData);
+    case "create-shelf":
+      return PantryController.createPantryShelf(userId);
+    case "save-shelf-name":
+      return PantryController.saveShelfName(formData);
+    case "delete-shelf":
+      return PantryController.deleteShelf(formData);
+    default:
+      return null;
   }
-  if (formData._action === "delete-item") {
-    return PantryController.deletePantryItem(formData);
-  }
-  if (formData._action === "create-shelf") {
-    return PantryController.createPantryShelf(userId);
-  }
-  if (formData._action === "save-shelf-name") {
-    return PantryController.saveShelfName(formData);
-  }
-  if (formData._action === "delete-shelf") {
-    return PantryController.deleteShelf(formData);
-  }
-  return null;
 };
 
 export default function Pantry() {
