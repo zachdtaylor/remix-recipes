@@ -3,17 +3,17 @@ import {
   useLoaderData,
   Form,
   ActionFunction,
-  useActionData,
   useTransition,
   useFetcher,
 } from "remix";
 import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
-import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
+import { LoadingIcon, PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
 import { classNames, useHydrated } from "~/utils/misc";
 import * as PantryShelf from "~/model/pantry-shelf";
 import * as PantryController from "~/controllers/pantry-controller.server";
 import { requireAuthSession } from "~/utils/auth.server";
 import { parseStringFormData } from "~/utils/http";
+import React from "react";
 
 type TPantryShelves = Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
 type TPantryShelf = TPantryShelves[number];
@@ -76,11 +76,25 @@ export default function Pantry() {
 }
 
 function Shelf({ shelf }: { shelf: TPantryShelf }) {
-  const actionData = useActionData();
   const fetcher = useFetcher();
   const hydrated = useHydrated();
+  const createItemRef = React.useRef<HTMLFormElement>(null);
+  const createItemInputRef = React.useRef<HTMLInputElement>(null);
+  const mounted = React.useRef<boolean>(false);
+
+  React.useEffect(() => {
+    if (fetcher.state === "idle" && mounted.current) {
+      createItemRef.current?.reset();
+      createItemInputRef.current?.focus();
+    }
+    mounted.current = true;
+  }, [fetcher.state]);
+
   const isDeletingShelf =
     fetcher.submission?.formData.get("_action") === "delete-shelf" &&
+    fetcher.submission.formData.get("shelfId") === shelf.id;
+  const isCreatingItem =
+    fetcher.submission?.formData.get("_action") === "create-item" &&
     fetcher.submission.formData.get("shelfId") === shelf.id;
 
   return isDeletingShelf ? null : (
@@ -91,16 +105,23 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
         "w-[calc(100vw-2rem)] md:w-96 flex-none"
       )}
     >
-      <Form reloadDocument method="post" className="flex">
+      <fetcher.Form method="post" className="flex">
         <TextInput
           name="shelfName"
           defaultValue={shelf.name}
           placeholder="Shelf Name"
-          error={actionData?.errors?.name}
+          error={fetcher.data?.errors?.shelfName}
           className="text-2xl font-extrabold mb-2 w-full"
           onBlur={(e) =>
             e.target.value !== shelf.name &&
-            fetcher.submit({ shelfName: e.target.value }, { method: "post" })
+            fetcher.submit(
+              {
+                _action: "save-shelf-name",
+                shelfName: e.target.value,
+                shelfId: shelf.id,
+              },
+              { method: "post" }
+            )
           }
         />
         <input type="hidden" name="shelfId" value={shelf.id} />
@@ -109,19 +130,25 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
             <SaveIcon />
           </button>
         )}
-      </Form>
-      <Form reloadDocument method="post" className="flex justify-between py-4">
-        <input type="hidden" name="shelfId" value={shelf.id} />
-        <TextInput
-          name="name"
-          placeholder="New Item"
-          error={actionData?.errors?.name}
-          className="w-full"
-        />
-        <button name="_action" value="create-item" className="ml-4">
-          <SaveIcon />
-        </button>
-      </Form>
+      </fetcher.Form>
+      <fetcher.Form method="post" ref={createItemRef}>
+        <fieldset
+          className="flex justify-between py-4"
+          disabled={isCreatingItem}
+        >
+          <input type="hidden" name="shelfId" value={shelf.id} />
+          <TextInput
+            name="name"
+            placeholder="New Item"
+            error={fetcher.data?.errors?.name}
+            inputRef={createItemInputRef}
+            className="w-full"
+          />
+          <button name="_action" value="create-item" className="ml-4">
+            {isCreatingItem ? <LoadingIcon /> : <SaveIcon />}
+          </button>
+        </fieldset>
+      </fetcher.Form>
       {shelf.items.map((item) => (
         <ShelfItem key={item.id} item={item} />
       ))}
