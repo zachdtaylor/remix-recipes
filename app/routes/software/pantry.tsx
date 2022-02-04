@@ -5,6 +5,7 @@ import {
   ActionFunction,
   useActionData,
   useTransition,
+  useFetcher,
 } from "remix";
 import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
 import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
@@ -14,8 +15,10 @@ import * as PantryController from "~/controllers/pantry-controller";
 import { requireAuthSession } from "~/utils/auth.server";
 import { parseStringFormData } from "~/utils/http";
 
+type TPantryShelves = Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
+type TPantryShelf = TPantryShelves[number];
 type LoaderData = {
-  pantry: Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
+  pantry: TPantryShelves;
 };
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await requireAuthSession(request);
@@ -48,11 +51,11 @@ export const action: ActionFunction = async ({ request }) => {
 
 export default function Pantry() {
   const data = useLoaderData<LoaderData>();
-  const actionData = useActionData();
   const transition = useTransition();
 
   const isCreatingShelf =
-    transition.state === "submitting" || transition.state === "loading";
+    transition.submission?.formData.get("_action") === "create-shelf";
+
   return (
     <div>
       <Form method="post">
@@ -66,69 +69,73 @@ export default function Pantry() {
       </Form>
       <div className={classNames("py-8 flex gap-8 overflow-x-auto")}>
         {data.pantry.map((shelf) => (
-          <div
-            key={shelf.id}
-            className={classNames(
-              "border-2 border-primary rounded-md p-4 h-fit",
-              "w-[calc(100vw-2rem)] md:w-96 flex-none"
-            )}
-          >
-            <Form reloadDocument method="post" className="flex">
-              <TextInput
-                name="shelfName"
-                defaultValue={shelf.name}
-                placeholder="Shelf Name"
-                error={actionData?.errors?.name}
-                className="text-2xl font-extrabold mb-2 w-full"
-              />
-              <input type="hidden" name="shelfId" value={shelf.id} />
-              <button name="_action" value="save-shelf-name" className="ml-4">
-                <SaveIcon />
-              </button>
-            </Form>
-            <Form
-              reloadDocument
-              method="post"
-              className="flex justify-between py-4"
-            >
-              <input type="hidden" name="shelfId" value={shelf.id} />
-              <TextInput
-                name="name"
-                placeholder="New Item"
-                error={actionData?.errors?.name}
-                className="w-full"
-              />
-              <button name="_action" value="create-item" className="ml-4">
-                <SaveIcon />
-              </button>
-            </Form>
-            {shelf.items.map((item) => (
-              <Form
-                key={item.id}
-                reloadDocument
-                method="post"
-                className="flex justify-between py-2"
-              >
-                <p>{item.name}</p>
-                <input type="hidden" name="itemId" value={item.id} />
-                <button name="_action" value="delete-item">
-                  <TrashIcon />
-                </button>
-              </Form>
-            ))}
-            <Form reloadDocument method="post" className="pt-8">
-              <input type="hidden" name="shelfId" value={shelf.id} />
-              <DeleteButton
-                name="_action"
-                value="delete-shelf"
-                className="w-full"
-              >
-                Delete Shelf
-              </DeleteButton>
-            </Form>
-          </div>
+          <Shelf shelf={shelf} />
         ))}
       </div>
+    </div>
+  );
+}
+
+function Shelf({ shelf }: { shelf: TPantryShelf }) {
+  const actionData = useActionData();
+  const fetcher = useFetcher();
+  const isDeletingShelf =
+    fetcher.submission?.formData.get("_action") === "delete-shelf" &&
+    fetcher.submission.formData.get("shelfId") === shelf.id;
+
+  return isDeletingShelf ? null : (
+    <div
+      key={shelf.id}
+      className={classNames(
+        "border-2 border-primary rounded-md p-4 h-fit",
+        "w-[calc(100vw-2rem)] md:w-96 flex-none"
+      )}
+    >
+      <Form reloadDocument method="post" className="flex">
+        <TextInput
+          name="shelfName"
+          defaultValue={shelf.name}
+          placeholder="Shelf Name"
+          error={actionData?.errors?.name}
+          className="text-2xl font-extrabold mb-2 w-full"
+        />
+        <input type="hidden" name="shelfId" value={shelf.id} />
+        <button name="_action" value="save-shelf-name" className="ml-4">
+          <SaveIcon />
+        </button>
+      </Form>
+      <Form reloadDocument method="post" className="flex justify-between py-4">
+        <input type="hidden" name="shelfId" value={shelf.id} />
+        <TextInput
+          name="name"
+          placeholder="New Item"
+          error={actionData?.errors?.name}
+          className="w-full"
+        />
+        <button name="_action" value="create-item" className="ml-4">
+          <SaveIcon />
+        </button>
+      </Form>
+      {shelf.items.map((item) => (
+        <Form
+          key={item.id}
+          reloadDocument
+          method="post"
+          className="flex justify-between py-2"
+        >
+          <p>{item.name}</p>
+          <input type="hidden" name="itemId" value={item.id} />
+          <button name="_action" value="delete-item">
+            <TrashIcon />
+          </button>
+        </Form>
+      ))}
+      <fetcher.Form method="post" className="pt-8">
+        <input type="hidden" name="shelfId" value={shelf.id} />
+        <DeleteButton name="_action" value="delete-shelf" className="w-full">
+          Delete Shelf
+        </DeleteButton>
+      </fetcher.Form>
     </div>
   );
 }
