@@ -20,7 +20,7 @@ import {
   useParams,
 } from "remix";
 
-import * as RecipeController from "~/controllers/recipe-controller";
+import * as RecipeController from "~/controllers/recipe-controller.server";
 import {
   SaveIcon,
   ThreeDotsIcon,
@@ -45,6 +45,10 @@ import {
   useForm,
   useHydrated,
 } from "~/utils/misc";
+
+export const handle = {
+  hydrate: false,
+};
 
 type LoaderData = {
   recipe: RecipeType & {
@@ -130,33 +134,35 @@ function RecipeRouteComponent() {
     transition.submission?.formData.get("_action") === "delete";
 
   return (
-    <Form id="recipe-form" method="post">
-      <button name="_action" value="save" className="hidden" />
-      <TextInput
-        inputKey={data.recipe.id}
-        name="name"
-        placeholder="Recipie Name"
-        value={form.values.name}
-        onChange={(e) => form.setValue("name", e.target.value)}
-        onBlur={() => form.ifChanged("name", save)}
-        error={fetcher.data?.errors?.name}
-        className="text-2xl font-extrabold mb-2 w-full"
-      />
-      <div className="flex justify-between items-center">
-        <div className="flex font-light text-gray-500 items-center">
-          <TimeIcon />
-          <TextInput
-            inputKey={data.recipe.id}
-            name="totalTime"
-            placeholder="Time"
-            value={form.values.totalTime}
-            onChange={(e) => form.setValue("totalTime", e.target.value)}
-            onBlur={() => form.ifChanged("totalTime", save)}
-            error={fetcher.data?.errors?.totalTime}
-            className="ml-1"
-          />
+    <div>
+      <Form id="recipe-form" method="post">
+        <button name="_action" value="save" className="hidden" />
+        <TextInput
+          inputKey={data.recipe.id}
+          name="name"
+          placeholder="Recipie Name"
+          value={form.values.name}
+          onChange={(e) => form.setValue("name", e.target.value)}
+          onBlur={() => form.ifChanged("name", save)}
+          error={fetcher.data?.errors?.name}
+          className="text-2xl font-extrabold mb-2 w-full"
+        />
+        <div className="flex justify-between items-center">
+          <div className="flex font-light text-gray-500 items-center">
+            <TimeIcon />
+            <TextInput
+              inputKey={data.recipe.id}
+              name="totalTime"
+              placeholder="Time"
+              value={form.values.totalTime}
+              onChange={(e) => form.setValue("totalTime", e.target.value)}
+              onBlur={() => form.ifChanged("totalTime", save)}
+              error={fetcher.data?.errors?.totalTime}
+              className="ml-1"
+            />
+          </div>
         </div>
-      </div>
+      </Form>
       <hr className="my-4" />
       <div className="flex items-center mb-2">
         <Heading2 className="mr-2">Ingredients</Heading2>
@@ -201,6 +207,7 @@ function RecipeRouteComponent() {
       <Heading2 className="mb-2">Instructions</Heading2>
       <TextArea
         key={data.recipe.id}
+        form="recipe-form"
         name="instructions"
         placeholder="Instructions"
         value={form.values.instructions}
@@ -213,15 +220,20 @@ function RecipeRouteComponent() {
         {hydrated ? (
           `Autosaved at ${formatDateTime(data.updatedAt)}`
         ) : (
-          <PrimaryButton name="_action" value="save">
+          <PrimaryButton name="_action" value="save" form="recipe-form">
             Save
           </PrimaryButton>
         )}
-        <DeleteButton name="_action" value="delete" disabled={isDeleting}>
+        <DeleteButton
+          name="_action"
+          value="delete"
+          form="recipe-form"
+          disabled={isDeleting}
+        >
           {isDeleting ? "Deleting" : "Delete this Recipe"}
         </DeleteButton>
       </div>
-    </Form>
+    </div>
   );
 }
 

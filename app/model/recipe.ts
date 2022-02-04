@@ -57,7 +57,7 @@ export function searchRecipes(userId: string, query: string | null) {
       },
     },
     orderBy: {
-      createdAt: "desc",
+      updatedAt: "desc",
     },
     take: 10,
   });

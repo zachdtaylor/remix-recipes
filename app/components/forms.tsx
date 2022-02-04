@@ -9,6 +9,7 @@ type InputProps = {
   className?: string;
   required?: boolean;
   value?: any;
+  form?: string;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => any;
   onChanged?: (e: React.FocusEvent<HTMLInputElement>) => any;
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => any;
@@ -19,23 +20,18 @@ type InputProps = {
   inputRef?: React.MutableRefObject<HTMLInputElement | null>;
 };
 export function Input({
-  name,
-  placeholder,
-  defaultValue,
   className,
-  type,
-  required,
-  value,
-  onChange,
   onChanged,
   onBlur,
   onEnter,
   inputKey,
-  disabled,
   inputRef,
+  defaultValue,
+  ...props
 }: InputProps & { type: string }) {
   return (
     <input
+      {...props}
       ref={inputRef}
       key={inputKey}
       onBlur={(e) => {
@@ -44,15 +40,8 @@ export function Input({
           onChanged?.(e);
         }
       }}
-      type={type}
-      required={required}
-      name={name}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
       defaultValue={defaultValue}
       autoComplete="off"
-      disabled={disabled}
       className={classNames("outline-none", className)}
       onKeyDown={(e) => {
         if (e.key === "Enter") {
@@ -109,6 +98,7 @@ type TextAreaProps = {
   onBlur?: (e: React.FocusEvent<HTMLTextAreaElement>) => any;
   className?: string;
   error?: string;
+  form?: string;
 };
 export function TextArea({
   error,
@@ -166,6 +156,7 @@ type ButtonProps = {
   name?: string;
   value?: string;
   disabled?: boolean;
+  form?: string;
 };
 function Button({ children, className, ...props }: ButtonProps) {
   return (
