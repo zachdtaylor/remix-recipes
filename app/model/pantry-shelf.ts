@@ -14,7 +14,7 @@ export function getPantryShelves(userId: string) {
       },
     },
     orderBy: {
-      createdAt: "asc",
+      createdAt: "desc",
     },
   });
 }

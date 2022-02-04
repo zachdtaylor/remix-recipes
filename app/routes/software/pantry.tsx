@@ -4,6 +4,7 @@ import {
   Form,
   ActionFunction,
   useActionData,
+  useTransition,
 } from "remix";
 import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
 import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
@@ -48,11 +49,19 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Pantry() {
   const data = useLoaderData<LoaderData>();
   const actionData = useActionData();
+  const transition = useTransition();
+
+  const isCreatingShelf =
+    transition.state === "submitting" || transition.state === "loading";
   return (
     <div>
-      <Form reloadDocument method="post">
-        <PrimaryButton name="_action" value="create-shelf">
-          <PlusIcon /> Create Shelf
+      <Form method="post">
+        <PrimaryButton
+          name="_action"
+          value="create-shelf"
+          disabled={isCreatingShelf}
+        >
+          <PlusIcon /> {isCreatingShelf ? "Creating Shelf" : "Create Shelf"}
         </PrimaryButton>
       </Form>
       <div className={classNames("py-8 flex gap-8 overflow-x-auto")}>
