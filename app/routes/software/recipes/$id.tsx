@@ -46,10 +46,6 @@ import {
   useHydrated,
 } from "~/utils/misc";
 
-export const handle = {
-  hydrate: false,
-};
-
 type LoaderData = {
   recipe: RecipeType & {
     ingredients: Array<IngredientType>;

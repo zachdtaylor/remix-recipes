@@ -23,11 +23,16 @@ export function formatDateTime(dateStr: string) {
   return format(date, "MMM dd, yyyy h:mm:ss aaa");
 }
 
+let hydrating = true;
 export function useHydrated() {
-  if (typeof window !== "undefined") {
-    return true;
-  }
-  return false;
+  const [hydrated, setHydrated] = React.useState(() => !hydrating);
+
+  React.useEffect(() => {
+    hydrating = false;
+    setHydrated(true);
+  }, []);
+
+  return hydrated;
 }
 
 export function randomImage() {

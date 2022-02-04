@@ -9,7 +9,7 @@ import {
 } from "remix";
 import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
 import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
-import { classNames } from "~/utils/misc";
+import { classNames, useHydrated } from "~/utils/misc";
 import * as PantryShelf from "~/model/pantry-shelf";
 import * as PantryController from "~/controllers/pantry-controller.server";
 import { requireAuthSession } from "~/utils/auth.server";
@@ -77,12 +77,13 @@ export default function Pantry() {
 function Shelf({ shelf }: { shelf: TPantryShelf }) {
   const actionData = useActionData();
   const fetcher = useFetcher();
+  const hydrated = useHydrated();
   const isDeletingShelf =
     fetcher.submission?.formData.get("_action") === "delete-shelf" &&
     fetcher.submission.formData.get("shelfId") === shelf.id;
 
   return isDeletingShelf ? null : (
-    <div
+    <fieldset
       key={shelf.id}
       className={classNames(
         "border-2 border-primary rounded-md p-4 h-fit",
@@ -96,11 +97,17 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
           placeholder="Shelf Name"
           error={actionData?.errors?.name}
           className="text-2xl font-extrabold mb-2 w-full"
+          onBlur={(e) =>
+            e.target.value !== shelf.name &&
+            fetcher.submit({ shelfName: e.target.value }, { method: "post" })
+          }
         />
         <input type="hidden" name="shelfId" value={shelf.id} />
-        <button name="_action" value="save-shelf-name" className="ml-4">
-          <SaveIcon />
-        </button>
+        {hydrated ? null : (
+          <button name="_action" value="save-shelf-name" className="ml-4">
+            <SaveIcon />
+          </button>
+        )}
       </Form>
       <Form reloadDocument method="post" className="flex justify-between py-4">
         <input type="hidden" name="shelfId" value={shelf.id} />
@@ -119,11 +126,15 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
           key={item.id}
           reloadDocument
           method="post"
-          className="flex justify-between py-2"
+          className="flex justify-between py-2 group"
         >
           <p>{item.name}</p>
           <input type="hidden" name="itemId" value={item.id} />
-          <button name="_action" value="delete-item">
+          <button
+            name="_action"
+            value="delete-item"
+            className="opacity-0 focus:opacity-100 group-hover:opacity-100 transition-opacity"
+          >
             <TrashIcon />
           </button>
         </Form>
@@ -134,6 +145,6 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
           Delete Shelf
         </DeleteButton>
       </fetcher.Form>
-    </div>
+    </fieldset>
   );
 }
