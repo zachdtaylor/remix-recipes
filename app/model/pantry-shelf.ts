@@ -1,5 +1,6 @@
-import { PantryShelf } from "@prisma/client";
+import { PantryShelf, Prisma } from "@prisma/client";
 import { db } from "~/utils/db.server";
+import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
 export function getPantryShelves(userId: string) {
   return db.pantryShelf.findMany({
@@ -42,10 +43,20 @@ export function savePantryShelf(
   });
 }
 
-export function deletePantryShelf(shelfId: string) {
-  return db.pantryShelf.delete({
-    where: {
-      id: shelfId,
-    },
-  });
+export async function deletePantryShelf(shelfId: string) {
+  try {
+    const deleted = await db.pantryShelf.delete({
+      where: {
+        id: shelfId,
+      },
+    });
+    return deleted;
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === PRISMA_ERROR_RECORD_NOT_FOUND) {
+        return null;
+      }
+    }
+    throw e;
+  }
 }

@@ -11,7 +11,7 @@ import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
 import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
 import * as PantryShelf from "~/model/pantry-shelf";
-import * as PantryController from "~/controllers/pantry-controller";
+import * as PantryController from "~/controllers/pantry-controller.server";
 import { requireAuthSession } from "~/utils/auth.server";
 import { parseStringFormData } from "~/utils/http";
 
@@ -67,7 +67,7 @@ export default function Pantry() {
       </Form>
       <div className={classNames("py-8 flex gap-8 overflow-x-auto")}>
         {data.pantry.map((shelf) => (
-          <Shelf shelf={shelf} />
+          <Shelf key={shelf.id} shelf={shelf} />
         ))}
       </div>
     </div>

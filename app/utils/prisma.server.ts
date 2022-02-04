@@ -1,0 +1,1 @@
+export const PRISMA_ERROR_RECORD_NOT_FOUND = "P2025";

@@ -1,18 +1,23 @@
 import { json } from "remix";
 import * as PantryItem from "~/model/pantry-item";
 import * as PantryShelf from "~/model/pantry-shelf";
+import { isEmpty } from "~/utils/misc";
 
 type ParsedFormData = { [key: string]: string };
+type Errors = { [key: string]: string };
 export function createPantryItem(userId: string, formData: ParsedFormData) {
+  const errors: Errors = {};
   if (!formData.name) {
-    return json({ errors: { name: "Required" } });
+    errors["name"] = "Required";
   }
   if (!formData.shelfId) {
-    return json({ errors: { shelfId: "Required" } });
+    errors["shelfId"] = "Required";
   }
-  return PantryItem.createPantryItem(userId, formData.shelfId, {
-    name: formData.name.trim(),
-  });
+  return isEmpty(errors)
+    ? PantryItem.createPantryItem(userId, formData.shelfId, {
+        name: formData.name.trim(),
+      })
+    : json({ errors });
 }
 
 export function deletePantryItem(formData: ParsedFormData) {
@@ -27,15 +32,18 @@ export function createPantryShelf(userId: string) {
 }
 
 export function saveShelfName(formData: ParsedFormData) {
+  const errors: Errors = {};
   if (!formData.shelfName) {
-    return json({ errors: { shelfName: "Required" } });
+    errors["shelfName"] = "Required";
   }
   if (!formData.shelfId) {
-    return json({ errors: { shelfId: "Required" } });
+    errors["shelfId"] = "Required";
   }
-  return PantryShelf.savePantryShelf(formData.shelfId, {
-    name: formData.shelfName.trim(),
-  });
+  return isEmpty(errors)
+    ? PantryShelf.savePantryShelf(formData.shelfId, {
+        name: formData.shelfName.trim(),
+      })
+    : json({ errors });
 }
 
 export function deleteShelf(formData: ParsedFormData) {
