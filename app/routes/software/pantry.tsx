@@ -17,6 +17,7 @@ import { parseStringFormData } from "~/utils/http";
 
 type TPantryShelves = Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
 type TPantryShelf = TPantryShelves[number];
+type TPantryShelfItem = TPantryShelf["items"][number];
 type LoaderData = {
   pantry: TPantryShelves;
 };
@@ -122,22 +123,7 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
         </button>
       </Form>
       {shelf.items.map((item) => (
-        <Form
-          key={item.id}
-          reloadDocument
-          method="post"
-          className="flex justify-between py-2 group"
-        >
-          <p>{item.name}</p>
-          <input type="hidden" name="itemId" value={item.id} />
-          <button
-            name="_action"
-            value="delete-item"
-            className="opacity-0 focus:opacity-100 group-hover:opacity-100 transition-opacity"
-          >
-            <TrashIcon />
-          </button>
-        </Form>
+        <ShelfItem key={item.id} item={item} />
       ))}
       <fetcher.Form method="post" className="pt-8">
         <input type="hidden" name="shelfId" value={shelf.id} />
@@ -146,5 +132,26 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
         </DeleteButton>
       </fetcher.Form>
     </fieldset>
+  );
+}
+
+function ShelfItem({ item }: { item: TPantryShelfItem }) {
+  const fetcher = useFetcher();
+
+  const isDeletingItem =
+    fetcher.submission?.formData.get("_action") === "delete-item";
+
+  return isDeletingItem ? null : (
+    <fetcher.Form method="post" className="flex justify-between py-2 group">
+      <p>{item.name}</p>
+      <input type="hidden" name="itemId" value={item.id} />
+      <button
+        name="_action"
+        value="delete-item"
+        className="opacity-0 focus:opacity-100 group-hover:opacity-100 transition-opacity"
+      >
+        <TrashIcon />
+      </button>
+    </fetcher.Form>
   );
 }
