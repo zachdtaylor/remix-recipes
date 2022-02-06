@@ -153,7 +153,6 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
         }}
       >
         <fieldset className="flex justify-between py-4">
-          <input type="hidden" name="itemId" value={hydrated ? uuidv4() : ""} />
           <input type="hidden" name="shelfId" value={shelf.id} />
           <TextInput
             name="name"
