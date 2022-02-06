@@ -1,4 +1,5 @@
 import { PantryItem, Prisma } from "@prisma/client";
+import invariant from "tiny-invariant";
 import { db } from "~/utils/db.server";
 import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
@@ -16,13 +17,18 @@ export function getPantryItems(userId: string) {
 export function createPantryItem(
   userId: string,
   shelfId: string,
-  data: Pick<PantryItem, "name">
+  data: Partial<PantryItem>
 ) {
+  invariant(
+    typeof data.name !== "undefined",
+    "Name is required to create pantry item"
+  );
   return db.pantryItem.create({
     data: {
       userId,
       shelfId,
       name: data.name,
+      id: data.id,
     },
   });
 }

@@ -16,6 +16,7 @@ export function createPantryItem(userId: string, formData: ParsedFormData) {
   return isEmpty(errors)
     ? PantryItem.createPantryItem(userId, formData.shelfId, {
         name: formData.name.trim(),
+        id: formData.itemId === "" ? undefined : formData.itemId,
       })
     : json({ errors });
 }

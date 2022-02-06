@@ -1,3 +1,4 @@
+import React from "react";
 import {
   LoaderFunction,
   useLoaderData,
@@ -6,14 +7,14 @@ import {
   useTransition,
   useFetcher,
 } from "remix";
+import { v4 as uuidv4 } from "uuid";
 import { DeleteButton, PrimaryButton, TextInput } from "~/components/forms";
-import { LoadingIcon, PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
+import { PlusIcon, SaveIcon, TrashIcon } from "~/components/icons";
 import { classNames, useHydrated } from "~/utils/misc";
 import * as PantryShelf from "~/model/pantry-shelf";
 import * as PantryController from "~/controllers/pantry-controller.server";
 import { requireAuthSession } from "~/utils/auth.server";
 import { parseStringFormData } from "~/utils/http";
-import React from "react";
 
 type TPantryShelves = Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
 type TPantryShelf = TPantryShelves[number];
@@ -81,20 +82,17 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
   const createItemRef = React.useRef<HTMLFormElement>(null);
   const createItemInputRef = React.useRef<HTMLInputElement>(null);
   const mounted = React.useRef<boolean>(false);
+  const { renderedItems, addItem } = useOptimisticItems(shelf.items);
 
   React.useEffect(() => {
     if (fetcher.state === "idle" && mounted.current) {
-      createItemRef.current?.reset();
-      createItemInputRef.current?.focus();
+      // createItemInputRef.current?.focus();
     }
     mounted.current = true;
   }, [fetcher.state]);
 
   const isDeletingShelf =
     fetcher.submission?.formData.get("_action") === "delete-shelf" &&
-    fetcher.submission.formData.get("shelfId") === shelf.id;
-  const isCreatingItem =
-    fetcher.submission?.formData.get("_action") === "create-item" &&
     fetcher.submission.formData.get("shelfId") === shelf.id;
 
   return isDeletingShelf ? null : (
@@ -131,11 +129,31 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
           </button>
         )}
       </fetcher.Form>
-      <fetcher.Form method="post" ref={createItemRef}>
-        <fieldset
-          className="flex justify-between py-4"
-          disabled={isCreatingItem}
-        >
+      <Form
+        method="post"
+        ref={createItemRef}
+        onSubmit={(e) => {
+          e.preventDefault();
+          const target = e.target as HTMLFormElement;
+          const itemNameInput = target.elements.namedItem(
+            "name"
+          ) as HTMLInputElement;
+          const id = uuidv4();
+          fetcher.submit(
+            {
+              itemId: id,
+              name: itemNameInput.value,
+              shelfId: shelf.id,
+              _action: "create-item",
+            },
+            { method: "post" }
+          );
+          addItem({ id, name: itemNameInput.value });
+          createItemRef.current?.reset();
+        }}
+      >
+        <fieldset className="flex justify-between py-4">
+          <input type="hidden" name="itemId" value={hydrated ? uuidv4() : ""} />
           <input type="hidden" name="shelfId" value={shelf.id} />
           <TextInput
             name="name"
@@ -145,11 +163,11 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
             className="w-full"
           />
           <button name="_action" value="create-item" className="ml-4">
-            {isCreatingItem ? <LoadingIcon /> : <SaveIcon />}
+            <SaveIcon />
           </button>
         </fieldset>
-      </fetcher.Form>
-      {shelf.items.map((item) => (
+      </Form>
+      {renderedItems.map((item) => (
         <ShelfItem key={item.id} item={item} />
       ))}
       <fetcher.Form method="post" className="pt-8">
@@ -162,7 +180,8 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
   );
 }
 
-function ShelfItem({ item }: { item: TPantryShelfItem }) {
+type PickedItem = Pick<TPantryShelfItem, "id" | "name">;
+function ShelfItem({ item }: { item: PickedItem }) {
   const fetcher = useFetcher();
 
   const isDeletingItem =
@@ -181,4 +200,33 @@ function ShelfItem({ item }: { item: TPantryShelfItem }) {
       </button>
     </fetcher.Form>
   );
+}
+
+export function useOptimisticItems(items: Array<TPantryShelfItem>) {
+  const [optimisticItems, setOptimisticItems] = React.useState<
+    Array<PickedItem>
+  >([]);
+
+  const renderedItems: Array<PickedItem> = [...items];
+  const savedIds = new Set(items.map((item) => item.id));
+  for (let item of optimisticItems) {
+    if (!savedIds.has(item.id)) {
+      renderedItems.push(item);
+    }
+  }
+  renderedItems.sort((a, b) => (a.name > b.name ? 1 : -1));
+
+  const optimisticIds = new Set(optimisticItems.map((item) => item.id));
+  let intersection = new Set([...savedIds].filter((x) => optimisticIds.has(x)));
+  if (intersection.size) {
+    setOptimisticItems(
+      optimisticItems.filter((item) => !intersection.has(item.id))
+    );
+  }
+
+  const addItem = (item: PickedItem) => {
+    setOptimisticItems((items) => [...items, item]);
+  };
+
+  return { renderedItems, addItem };
 }
