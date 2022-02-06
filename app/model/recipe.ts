@@ -1,6 +1,7 @@
-import { Recipe } from "@prisma/client";
+import { Prisma, Recipe } from "@prisma/client";
 import { db } from "~/utils/db.server";
 import { randomImage } from "~/utils/misc";
+import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
 export function createRecipe(userId: string) {
   return db.recipe.create({
@@ -63,8 +64,18 @@ export function searchRecipes(userId: string, query: string | null) {
   });
 }
 
-export function deleteRecipe(id: string) {
-  return db.recipe.delete({
-    where: { id: id },
-  });
+export async function deleteRecipe(id: string) {
+  try {
+    const deleted = await db.recipe.delete({
+      where: { id: id },
+    });
+    return deleted;
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === PRISMA_ERROR_RECORD_NOT_FOUND) {
+        return null;
+      }
+    }
+    throw e;
+  }
 }

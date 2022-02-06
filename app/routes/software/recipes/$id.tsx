@@ -19,14 +19,10 @@ import {
   useTransition,
   useParams,
 } from "remix";
+import { v4 as uuidv4 } from "uuid";
 
 import * as RecipeController from "~/controllers/recipe-controller.server";
-import {
-  SaveIcon,
-  ThreeDotsIcon,
-  TimeIcon,
-  TrashIcon,
-} from "~/components/icons";
+import { SaveIcon, TimeIcon, TrashIcon } from "~/components/icons";
 import { Heading2, ErrorSection } from "~/components/lib";
 import {
   DeleteButton,
@@ -35,16 +31,8 @@ import {
   TextInput,
 } from "~/components/forms";
 import * as Recipe from "~/model/recipe";
-import * as Ingredient from "~/model/ingredient";
-import { parseStringFormData } from "~/utils/http";
-import {
-  formatDateTime,
-  isEmpty,
-  maxDate,
-  useFocusOnce,
-  useForm,
-  useHydrated,
-} from "~/utils/misc";
+import { getStringValue } from "~/utils/http";
+import { formatDateTime, maxDate, useForm, useHydrated } from "~/utils/misc";
 
 type LoaderData = {
   recipe: RecipeType & {
@@ -78,26 +66,23 @@ export const action: ActionFunction = async ({ params, request }) => {
   if (typeof recipeId === "undefined") {
     return null;
   }
-  const formData = await parseStringFormData(request);
-  if (formData._action === "delete") {
-    await Recipe.deleteRecipe(recipeId);
-    return redirect("/software/recipes");
+  const formData = await request.formData();
+  const action = getStringValue(formData, "_action", true);
+  if (action.includes("delete-ingredient")) {
+    const [, ingredientId] = action.split(".");
+    return RecipeController.deleteIngredient(ingredientId);
   }
-  if (formData._action === "add-ingredient") {
-    return Ingredient.createOrUpdateIngredient(recipeId, formData.id, {
-      name: formData.name,
-      amount: formData.amount,
-    });
+  switch (action) {
+    case "delete-recipe":
+      await RecipeController.deleteRecipe(recipeId);
+      return redirect("/software/recipes");
+    case "add-ingredient":
+      return RecipeController.addIngredient(recipeId, formData);
+    case "save-recipe":
+      return RecipeController.saveRecipie(recipeId, formData);
+    default:
+      return null;
   }
-  if (formData._action?.includes("delete-ingredient")) {
-    const ingredientId = formData._action.split(".")[1];
-    return Ingredient.deleteIngredient(ingredientId);
-  }
-  const errors = RecipeController.validateRecipe(formData);
-  if (!isEmpty(errors)) {
-    return { id: recipeId, errors };
-  }
-  return RecipeController.saveRecipie(recipeId, formData);
 };
 
 export default function RecipeRoute() {
@@ -110,9 +95,9 @@ function RecipeRouteComponent() {
   const fetcher = useFetcher();
   const transition = useTransition();
   const hydrated = useHydrated();
-  const [hasCreated, setHasCreated] = React.useState(false);
-  const [newRows, setNewRows] = React.useState(1);
-  const [deletedIds, setDeletedIds] = React.useState<Array<string>>([]);
+  const { renderedItems, addItem } = useOptimisticItems(
+    data.recipe.ingredients
+  );
   const form = useForm({
     name: data.recipe.name,
     totalTime: data.recipe.totalTime,
@@ -121,13 +106,13 @@ function RecipeRouteComponent() {
 
   const save = () => {
     return fetcher.submit(
-      { _action: "save", ...form.values },
+      { _action: "save-recipe", ...form.values },
       { method: "post" }
     );
   };
 
   const isDeleting =
-    transition.submission?.formData.get("_action") === "delete";
+    transition.submission?.formData.get("_action") === "delete-recipe";
 
   return (
     <div>
@@ -163,43 +148,23 @@ function RecipeRouteComponent() {
       <div className="flex items-center mb-2">
         <Heading2 className="mr-2">Ingredients</Heading2>
       </div>
-      <table className="mb-4 w-full">
-        <thead>
-          <tr>
-            <th className="text-left w-1/3 pr-4">Amount</th>
-            <th className="text-left">Name</th>
-            <th className="w-4"></th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.recipe.ingredients.map((ingredient, index) =>
-            !!deletedIds.find((id) => id === ingredient.id) ? null : (
-              <IngredientRow
-                key={ingredient.id}
-                ingredient={ingredient}
-                onDelete={() => {
-                  setDeletedIds((ids) => [...ids, ingredient.id]);
-                }}
-              />
-            )
-          )}
-          {Array.from(Array(newRows)).map((_, index) => (
-            <NewIngredientRow
-              key={index}
-              ingredient={{
-                id: "",
-                name: "",
-                amount: "",
-              }}
-              focusWhen={hasCreated}
-              onCreate={() => {
-                setHasCreated(true);
-                setNewRows((n) => n + 1);
-              }}
-            />
-          ))}
-        </tbody>
-      </table>
+      <div className="mb-4 w-full table">
+        <div className="table-row">
+          <div className="text-left w-1/3 pr-4 font-bold table-cell">
+            Amount
+          </div>
+          <div className="text-left table-cell font-bold">Name</div>
+          <div className="w-4 table-cell"></div>
+        </div>
+        {renderedItems.map((ingredient) => (
+          <IngredientRow key={ingredient.id} ingredient={ingredient} />
+        ))}
+        <IngredientRow
+          isNew
+          ingredient={{ id: uuidv4(), name: "", amount: "" }}
+          onSave={addItem}
+        />
+      </div>
       <Heading2 className="mb-2">Instructions</Heading2>
       <TextArea
         key={data.recipe.id}
@@ -216,13 +181,13 @@ function RecipeRouteComponent() {
         {hydrated ? (
           `Autosaved at ${formatDateTime(data.updatedAt)}`
         ) : (
-          <PrimaryButton name="_action" value="save" form="recipe-form">
+          <PrimaryButton name="_action" value="save-recipe" form="recipe-form">
             Save
           </PrimaryButton>
         )}
         <DeleteButton
           name="_action"
-          value="delete"
+          value="delete-recipe"
           form="recipe-form"
           disabled={isDeleting}
         >
@@ -249,169 +214,126 @@ export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
   );
 };
 
+type TIngredient = Pick<IngredientType, "id" | "amount" | "name">;
 type IngredientRowProps = {
-  ingredient: IngredientType;
-  onDelete?: () => void;
+  ingredient: TIngredient;
+  isNew?: boolean;
+  onSave?: (ingredient: TIngredient) => void;
 };
-function IngredientRow({ ingredient, onDelete }: IngredientRowProps) {
+function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
   const form = useForm(ingredient);
   const fetcher = useFetcher();
+  const amountRef = React.useRef<HTMLInputElement>(null);
 
   const save = () => {
-    const name = `ingredient.${ingredient.id}.name`;
-    const amount = `ingredient.${ingredient.id}.amount`;
     fetcher.submit(
       {
-        _action: "save",
-        [name]: form.values.name,
-        [amount]: form.values.amount,
+        _action: "save-recipe",
+        ingredientName: form.values.name,
+        ingredientAmount: form.values.amount,
+        ingredientId: ingredient.id,
       },
       { method: "post" }
     );
+    onSave?.({
+      id: ingredient.id,
+      name: form.values.name,
+      amount: form.values.amount,
+    });
+    isNew && form.reset();
+    isNew && amountRef.current?.focus();
   };
 
   const deleteIngredient = () => {
-    onDelete?.();
     return fetcher.submit(
       { _action: `delete-ingredient.${ingredient.id}` },
       { method: "post" }
     );
   };
 
-  return (
-    <IngredientRowContent
-      ingredient={ingredient}
-      form={form}
-      onBlurAmount={() => form.ifChanged("amount", save)}
-      onBlurName={() => form.ifChanged("name", save)}
-      onEnter={save}
-      buttonContent={<TrashIcon />}
-      onClickButton={deleteIngredient}
-    />
-  );
-}
+  const isDeleting =
+    fetcher.submission?.formData.get("_action") ===
+    `delete-ingredient.${ingredient.id}`;
 
-type NewIngredientRowProps = {
-  ingredient: Pick<IngredientType, "id" | "name" | "amount">;
-  onCreate: () => void;
-  focusWhen: boolean;
-};
-function NewIngredientRow({
-  ingredient,
-  onCreate,
-  focusWhen,
-}: NewIngredientRowProps) {
-  const form = useForm(ingredient);
-  const fetcher = useFetcher();
-  const amountRef = useFocusOnce(focusWhen);
-
-  const create = () => {
-    onCreate();
-    fetcher.submit(
-      {
-        _action: "add-ingredient",
-        id: ingredient.id,
-        name: form.values.name,
-        amount: form.values.amount,
-      },
-      { method: "post" }
-    );
-  };
-
-  const onBlur = (name: "name" | "amount") =>
-    form.ifChanged(name, () => {
-      if (name === "name") {
-        create();
-      }
-    });
-
-  const isCreating =
-    fetcher.submission?.formData.get("_action") === "add-ingredient";
-
-  if (fetcher.type === "done") {
-    return null;
-  }
-
-  return (
-    <IngredientRowContent
-      ingredient={ingredient}
-      amountRef={amountRef}
-      form={form}
-      onBlurAmount={() => onBlur("amount")}
-      onBlurName={() => onBlur("name")}
-      onEnter={create}
-      disabled={isCreating}
-      buttonContent={isCreating ? <ThreeDotsIcon /> : <SaveIcon />}
-      onClickButton={create}
-    />
-  );
-}
-
-type IngredientRowContentProps = {
-  ingredient: Pick<IngredientType, "id" | "name" | "amount">;
-  amountRef?: React.MutableRefObject<HTMLInputElement | null>;
-  form: ReturnType<typeof useForm>;
-  onEnter: () => void;
-  disabled?: boolean;
-  onBlurAmount: () => void;
-  onBlurName: () => void;
-  onClickButton: () => void;
-  buttonContent: React.ReactNode;
-};
-function IngredientRowContent({
-  ingredient,
-  amountRef,
-  form,
-  onEnter,
-  disabled,
-  onBlurAmount,
-  onBlurName,
-  buttonContent,
-  onClickButton,
-}: IngredientRowContentProps) {
-  return (
-    <tr>
-      <td className="pr-4 py-1">
+  return isDeleting ? null : (
+    <div className="table-row">
+      <div className="pr-4 py-1 table-cell">
+        <input
+          type="hidden"
+          name="ingredientId"
+          form="recipe-form"
+          value={ingredient.id}
+        />
         <TextInput
-          name={`ingredient.${ingredient.id}.amount`}
+          name="ingredientAmount"
           inputRef={amountRef}
           value={form.values.amount}
           onChange={(e) => form.setValue("amount", e.target.value)}
+          form="recipe-form"
           placeholder="---"
-          onBlur={onBlurAmount}
+          onBlur={() => !isNew && form.ifChanged("amount", save)}
           onEnter={(e) => {
             e.preventDefault();
-            onEnter();
+            save();
           }}
           className="w-full"
-          disabled={disabled}
         />
-      </td>
-      <td className="pr-4 py-1">
+      </div>
+      <div className="pr-4 py-1 table-cell">
         <TextInput
-          name={`ingredient.${ingredient.id}.name`}
+          name="ingredientName"
           placeholder="---"
           value={form.values.name}
           onChange={(e) => form.setValue("name", e.target.value)}
-          onBlur={onBlurName}
+          form="recipe-form"
+          onBlur={() => form.ifChanged("name", save)}
           onEnter={(e) => {
             e.preventDefault();
-            onEnter();
+            save();
           }}
           className="w-full"
-          disabled={disabled}
         />
-      </td>
-      <td className="text-right py-1">
+      </div>
+      <div className="text-right py-1 table-cell">
         <button
+          form="recipe-form"
           name="_action"
-          value="add-ingredient"
-          disabled={disabled}
-          onClick={onClickButton}
+          value={
+            isNew ? "add-ingredient" : `delete-ingredient.${ingredient.id}`
+          }
+          onClick={deleteIngredient}
         >
-          {buttonContent}
+          {isNew ? <SaveIcon /> : <TrashIcon />}
         </button>
-      </td>
-    </tr>
+      </div>
+    </div>
   );
+}
+
+export function useOptimisticItems(items: Array<TIngredient>) {
+  const [optimisticItems, setOptimisticItems] = React.useState<
+    Array<TIngredient>
+  >([]);
+
+  const renderedItems: Array<TIngredient> = [...items];
+  const savedIds = new Set(items.map((item) => item.id));
+  for (let item of optimisticItems) {
+    if (!savedIds.has(item.id)) {
+      renderedItems.push(item);
+    }
+  }
+
+  const optimisticIds = new Set(optimisticItems.map((item) => item.id));
+  let intersection = new Set([...savedIds].filter((x) => optimisticIds.has(x)));
+  if (intersection.size) {
+    setOptimisticItems(
+      optimisticItems.filter((item) => !intersection.has(item.id))
+    );
+  }
+
+  const addItem = (item: TIngredient) => {
+    setOptimisticItems((items) => [...items, item]);
+  };
+
+  return { renderedItems, addItem };
 }

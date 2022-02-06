@@ -77,7 +77,9 @@ export function useForm(initialValues: { [key: string]: any }) {
     }
   };
 
-  return { values, setValue, ifChanged };
+  const reset = () => setValues(initialValues);
+
+  return { values, setValue, ifChanged, reset };
 }
 
 export function useShouldHydrate() {

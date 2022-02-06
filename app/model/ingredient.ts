@@ -1,5 +1,6 @@
-import { Ingredient } from "@prisma/client";
+import { Ingredient, Prisma } from "@prisma/client";
 import { db } from "~/utils/db.server";
+import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
 export function createIngredient(recipieId: string) {
   return db.ingredient.create({
@@ -33,15 +34,25 @@ export function createOrUpdateIngredient(
     where: {
       id: id,
     },
-    create: { recipeId, name, amount, ...data },
+    create: { recipeId, name, amount, id, ...data },
     update: data,
   });
 }
 
-export function deleteIngredient(id: string) {
-  return db.ingredient.delete({
-    where: {
-      id: id,
-    },
-  });
+export async function deleteIngredient(id: string) {
+  try {
+    const deleted = await db.ingredient.delete({
+      where: {
+        id: id,
+      },
+    });
+    return deleted;
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError) {
+      if (e.code === PRISMA_ERROR_RECORD_NOT_FOUND) {
+        return null;
+      }
+    }
+    throw e;
+  }
 }
