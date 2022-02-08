@@ -55,9 +55,18 @@ export const action: ActionFunction = async ({ request }) => {
 export default function Pantry() {
   const data = useLoaderData<LoaderData>();
   const transition = useTransition();
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const isCreatingShelf =
     transition.submission?.formData.get("_action") === "create-shelf";
+
+  React.useEffect(() => {
+    if (isCreatingShelf) {
+      if (containerRef.current) {
+        containerRef.current.scrollLeft = 0;
+      }
+    }
+  }, [isCreatingShelf]);
 
   return (
     <div>
@@ -70,7 +79,13 @@ export default function Pantry() {
           <PlusIcon /> {isCreatingShelf ? "Creating Shelf" : "Create Shelf"}
         </PrimaryButton>
       </Form>
-      <div className={classNames("py-8 flex gap-8 overflow-x-auto")}>
+      <div
+        ref={containerRef}
+        className={classNames(
+          "py-8 flex gap-8 overflow-x-auto snap-mandatory md:snap-none",
+          isCreatingShelf ? "snap-none" : "snap-x"
+        )}
+      >
         {data.pantry.map((shelf) => (
           <Shelf key={shelf.id} shelf={shelf} />
         ))}
@@ -84,18 +99,10 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
   const hydrated = useHydrated();
   const createItemRef = React.useRef<HTMLFormElement>(null);
   const createItemInputRef = React.useRef<HTMLInputElement>(null);
-  const mounted = React.useRef<boolean>(false);
   const { renderedItems, addItem } = useOptimisticItems<PickedItem>(
     shelf.items,
     (a, b) => (a.name > b.name ? 1 : -1)
   );
-
-  React.useEffect(() => {
-    if (fetcher.state === "idle" && mounted.current) {
-      // createItemInputRef.current?.focus();
-    }
-    mounted.current = true;
-  }, [fetcher.state]);
 
   const isDeletingShelf =
     fetcher.submission?.formData.get("_action") === "delete-shelf" &&
@@ -106,7 +113,7 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
       key={shelf.id}
       className={classNames(
         "border-2 border-primary rounded-md p-4 h-fit",
-        "w-[calc(100vw-2rem)] md:w-96 flex-none"
+        "w-[calc(100vw-2rem)] md:w-96 flex-none snap-center"
       )}
     >
       <fetcher.Form method="post" className="flex">
