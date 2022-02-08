@@ -263,7 +263,7 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
 
   return isDeleting ? null : (
     <fetcher.Form id={formId} method="post" className="table-row-group">
-      <div className="table-row">
+      <div className="table-row group">
         <div className="pr-4 py-1 table-cell">
           <input
             type="hidden"
@@ -300,6 +300,7 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
             form={hydrated ? formId : "recipe-form"}
             name="_action"
             value={isNew ? "save-recipe" : `delete-ingredient.${ingredient.id}`}
+            className="opacity-0 focus:opacity-100 group-hover:opacity-100"
           >
             {isNew ? <SaveIcon /> : <TrashIcon />}
           </button>
