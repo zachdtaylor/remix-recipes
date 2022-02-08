@@ -15,13 +15,16 @@ import * as PantryShelf from "~/model/pantry-shelf";
 import * as PantryController from "~/controllers/pantry-controller.server";
 import { requireAuthSession } from "~/utils/auth.server";
 import { parseStringFormData } from "~/utils/http";
+import { useOptimisticItems } from "~/utils/misc";
 
 type TPantryShelves = Awaited<ReturnType<typeof PantryShelf.getPantryShelves>>;
 type TPantryShelf = TPantryShelves[number];
 type TPantryShelfItem = TPantryShelf["items"][number];
+type PickedItem = Pick<TPantryShelfItem, "id" | "name">;
 type LoaderData = {
   pantry: TPantryShelves;
 };
+
 export const loader: LoaderFunction = async ({ request }) => {
   const session = await requireAuthSession(request);
   const userId = session.get("userId");
@@ -82,7 +85,10 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
   const createItemRef = React.useRef<HTMLFormElement>(null);
   const createItemInputRef = React.useRef<HTMLInputElement>(null);
   const mounted = React.useRef<boolean>(false);
-  const { renderedItems, addItem } = useOptimisticItems(shelf.items);
+  const { renderedItems, addItem } = useOptimisticItems<PickedItem>(
+    shelf.items,
+    (a, b) => (a.name > b.name ? 1 : -1)
+  );
 
   React.useEffect(() => {
     if (fetcher.state === "idle" && mounted.current) {
@@ -179,7 +185,6 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
   );
 }
 
-type PickedItem = Pick<TPantryShelfItem, "id" | "name">;
 function ShelfItem({ item }: { item: PickedItem }) {
   const fetcher = useFetcher();
 
@@ -199,33 +204,4 @@ function ShelfItem({ item }: { item: PickedItem }) {
       </button>
     </fetcher.Form>
   );
-}
-
-export function useOptimisticItems(items: Array<TPantryShelfItem>) {
-  const [optimisticItems, setOptimisticItems] = React.useState<
-    Array<PickedItem>
-  >([]);
-
-  const renderedItems: Array<PickedItem> = [...items];
-  const savedIds = new Set(items.map((item) => item.id));
-  for (let item of optimisticItems) {
-    if (!savedIds.has(item.id)) {
-      renderedItems.push(item);
-    }
-  }
-  renderedItems.sort((a, b) => (a.name > b.name ? 1 : -1));
-
-  const optimisticIds = new Set(optimisticItems.map((item) => item.id));
-  let intersection = new Set([...savedIds].filter((x) => optimisticIds.has(x)));
-  if (intersection.size) {
-    setOptimisticItems(
-      optimisticItems.filter((item) => !intersection.has(item.id))
-    );
-  }
-
-  const addItem = (item: PickedItem) => {
-    setOptimisticItems((items) => [...items, item]);
-  };
-
-  return { renderedItems, addItem };
 }

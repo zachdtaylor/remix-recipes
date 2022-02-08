@@ -32,7 +32,13 @@ import {
 } from "~/components/forms";
 import * as Recipe from "~/model/recipe";
 import { getStringValue } from "~/utils/http";
-import { formatDateTime, maxDate, useForm, useHydrated } from "~/utils/misc";
+import {
+  formatDateTime,
+  maxDate,
+  useForm,
+  useHydrated,
+  useOptimisticItems,
+} from "~/utils/misc";
 import { requireAuthSession } from "~/utils/auth.server";
 
 type LoaderData = {
@@ -99,7 +105,7 @@ function RecipeRouteComponent() {
   const fetcher = useFetcher();
   const transition = useTransition();
   const hydrated = useHydrated();
-  const { renderedItems, addItem } = useOptimisticItems(
+  const { renderedItems, addItem } = useOptimisticItems<TIngredient>(
     data.recipe.ingredients
   );
   const form = useForm({
@@ -253,7 +259,7 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
     fetcher.submission?.formData.get("_action") ===
     `delete-ingredient.${ingredient.id}`;
 
-  const formId = `ingredient-form.${ingredient.id}`;
+  const formId = `ingredient-form.${isNew ? "new" : ingredient.id}`;
 
   return isDeleting ? null : (
     <fetcher.Form id={formId} method="post" className="table-row-group">
@@ -301,32 +307,4 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
       </div>
     </fetcher.Form>
   );
-}
-
-export function useOptimisticItems(items: Array<TIngredient>) {
-  const [optimisticItems, setOptimisticItems] = React.useState<
-    Array<TIngredient>
-  >([]);
-
-  const renderedItems: Array<TIngredient> = [...items];
-  const savedIds = new Set(items.map((item) => item.id));
-  for (let item of optimisticItems) {
-    if (!savedIds.has(item.id)) {
-      renderedItems.push(item);
-    }
-  }
-
-  const optimisticIds = new Set(optimisticItems.map((item) => item.id));
-  let intersection = new Set([...savedIds].filter((x) => optimisticIds.has(x)));
-  if (intersection.size) {
-    setOptimisticItems(
-      optimisticItems.filter((item) => !intersection.has(item.id))
-    );
-  }
-
-  const addItem = (item: TIngredient) => {
-    setOptimisticItems((items) => [...items, item]);
-  };
-
-  return { renderedItems, addItem };
 }

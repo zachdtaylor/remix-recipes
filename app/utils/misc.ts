@@ -86,3 +86,39 @@ export function useShouldHydrate() {
   const matches = useMatches();
   return !matches.some((match) => match.handle?.hydrate === false);
 }
+
+type OptimisticItem = {
+  id: string;
+  name: string;
+};
+export function useOptimisticItems<T extends OptimisticItem>(
+  items: Array<T>,
+  sort?: (a: T, b: T) => number
+) {
+  const [optimisticItems, setOptimisticItems] = React.useState<Array<T>>([]);
+
+  const renderedItems: Array<T> = [...items];
+  const savedIds = new Set(items.map((item) => item.id));
+  for (let item of optimisticItems) {
+    if (!savedIds.has(item.id)) {
+      renderedItems.push(item);
+    }
+  }
+  if (typeof sort !== "undefined") {
+    renderedItems.sort(sort);
+  }
+
+  const optimisticIds = new Set(optimisticItems.map((item) => item.id));
+  let intersection = new Set([...savedIds].filter((x) => optimisticIds.has(x)));
+  if (intersection.size) {
+    setOptimisticItems(
+      optimisticItems.filter((item) => !intersection.has(item.id))
+    );
+  }
+
+  const addItem = (item: T) => {
+    setOptimisticItems((items) => [...items, item]);
+  };
+
+  return { renderedItems, addItem };
+}
