@@ -2,27 +2,6 @@ import { Ingredient, Prisma } from "@prisma/client";
 import { db } from "~/utils/db.server";
 import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
-export function createIngredient(recipieId: string) {
-  return db.ingredient.create({
-    data: {
-      recipeId: recipieId,
-      name: "",
-      amount: "",
-    },
-  });
-}
-
-export function updateIngredient(id: string, data: Partial<Ingredient>) {
-  const name = data.name;
-  const amount = data.amount;
-  return db.ingredient.update({
-    where: {
-      id: id,
-    },
-    data: { name, amount },
-  });
-}
-
 export function createOrUpdateIngredient(
   recipeId: string,
   id: string | undefined,

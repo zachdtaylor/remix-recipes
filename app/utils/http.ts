@@ -8,26 +8,18 @@ export async function parseStringFormData(request: Request) {
   return Object.fromEntries(new URLSearchParams(await request.text()));
 }
 
-type ReturnType<T> = T extends false
-  ? string | undefined
-  : T extends true
-  ? string
-  : never;
-export function getStringValue<T extends boolean>(
-  formData: FormData,
-  name: string,
-  strict: T = true as T
-): ReturnType<T> {
-  const value = formData.get(name);
-  if (strict) {
-    console.log(value);
-    invariant(typeof value === "string", `${name} must be a string`);
-  } else {
-    if (typeof value !== "string") {
-      return undefined as ReturnType<T>;
+export function getStringValue(formData: FormData, name: string) {
+  if (formData.has(name)) {
+    const value = formData.get(name);
+    invariant(
+      typeof value === "string" || value === null,
+      "Value must be string or null."
+    );
+    if (value === null) {
+      return "";
     }
+    return value;
   }
-  return value as ReturnType<T>;
 }
 
 export function getStringValues(formData: FormData, name: string) {

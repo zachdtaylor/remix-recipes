@@ -33,6 +33,7 @@ import {
 import * as Recipe from "~/model/recipe";
 import { getStringValue } from "~/utils/http";
 import { formatDateTime, maxDate, useForm, useHydrated } from "~/utils/misc";
+import { requireAuthSession } from "~/utils/auth.server";
 
 type LoaderData = {
   recipe: RecipeType & {
@@ -62,12 +63,17 @@ export const loader: LoaderFunction = async ({ params }) => {
 };
 
 export const action: ActionFunction = async ({ params, request }) => {
+  await requireAuthSession(request);
+
   const recipeId = params.id;
   if (typeof recipeId === "undefined") {
     return null;
   }
   const formData = await request.formData();
-  const action = getStringValue(formData, "_action", true);
+  const action = getStringValue(formData, "_action");
+  if (typeof action === "undefined") {
+    return null;
+  }
   if (action.includes("delete-ingredient")) {
     const [, ingredientId] = action.split(".");
     return RecipeController.deleteIngredient(ingredientId);
@@ -76,8 +82,6 @@ export const action: ActionFunction = async ({ params, request }) => {
     case "delete-recipe":
       await RecipeController.deleteRecipe(recipeId);
       return redirect("/software/recipes");
-    case "add-ingredient":
-      return RecipeController.addIngredient(recipeId, formData);
     case "save-recipe":
       return RecipeController.saveRecipie(recipeId, formData);
     default:
@@ -117,7 +121,7 @@ function RecipeRouteComponent() {
   return (
     <div>
       <Form id="recipe-form" method="post">
-        <button name="_action" value="save" className="hidden" />
+        <button name="_action" value="save-recipe" className="hidden" />
         <TextInput
           inputKey={data.recipe.id}
           name="name"
@@ -224,6 +228,7 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
   const form = useForm(ingredient);
   const fetcher = useFetcher();
   const amountRef = React.useRef<HTMLInputElement>(null);
+  const hydrated = useHydrated();
 
   const save = () => {
     fetcher.submit(
@@ -244,69 +249,57 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
     isNew && amountRef.current?.focus();
   };
 
-  const deleteIngredient = () => {
-    return fetcher.submit(
-      { _action: `delete-ingredient.${ingredient.id}` },
-      { method: "post" }
-    );
-  };
-
   const isDeleting =
     fetcher.submission?.formData.get("_action") ===
     `delete-ingredient.${ingredient.id}`;
 
+  const formId = `ingredient-form.${ingredient.id}`;
+
   return isDeleting ? null : (
-    <div className="table-row">
-      <div className="pr-4 py-1 table-cell">
-        <input
-          type="hidden"
-          name="ingredientId"
-          form="recipe-form"
-          value={ingredient.id}
-        />
-        <TextInput
-          name="ingredientAmount"
-          inputRef={amountRef}
-          value={form.values.amount}
-          onChange={(e) => form.setValue("amount", e.target.value)}
-          form="recipe-form"
-          placeholder="---"
-          onBlur={() => !isNew && form.ifChanged("amount", save)}
-          onEnter={(e) => {
-            e.preventDefault();
-            save();
-          }}
-          className="w-full"
-        />
+    <fetcher.Form id={formId} method="post" className="table-row-group">
+      <div className="table-row">
+        <div className="pr-4 py-1 table-cell">
+          <input
+            type="hidden"
+            name="ingredientId"
+            form={hydrated ? formId : "recipe-form"}
+            value={ingredient.id}
+          />
+          <button name="_action" value="save-recipe" className="hidden" />
+          <TextInput
+            name="ingredientAmount"
+            inputRef={amountRef}
+            value={form.values.amount}
+            onChange={(e) => form.setValue("amount", e.target.value)}
+            form={hydrated ? formId : "recipe-form"}
+            placeholder="---"
+            onBlur={() => !isNew && form.ifChanged("amount", save)}
+            className="w-full"
+          />
+        </div>
+        <div className="pr-4 py-1 table-cell">
+          <TextInput
+            name="ingredientName"
+            placeholder="---"
+            value={form.values.name}
+            onChange={(e) => form.setValue("name", e.target.value)}
+            form={hydrated ? formId : "recipe-form"}
+            onBlur={() => form.ifChanged("name", save)}
+            error={fetcher.data?.errors?.[`ingredient.${ingredient.id}.name`]}
+            className="w-full"
+          />
+        </div>
+        <div className="text-right py-1 table-cell">
+          <button
+            form={hydrated ? formId : "recipe-form"}
+            name="_action"
+            value={isNew ? "save-recipe" : `delete-ingredient.${ingredient.id}`}
+          >
+            {isNew ? <SaveIcon /> : <TrashIcon />}
+          </button>
+        </div>
       </div>
-      <div className="pr-4 py-1 table-cell">
-        <TextInput
-          name="ingredientName"
-          placeholder="---"
-          value={form.values.name}
-          onChange={(e) => form.setValue("name", e.target.value)}
-          form="recipe-form"
-          onBlur={() => form.ifChanged("name", save)}
-          onEnter={(e) => {
-            e.preventDefault();
-            save();
-          }}
-          className="w-full"
-        />
-      </div>
-      <div className="text-right py-1 table-cell">
-        <button
-          form="recipe-form"
-          name="_action"
-          value={
-            isNew ? "add-ingredient" : `delete-ingredient.${ingredient.id}`
-          }
-          onClick={deleteIngredient}
-        >
-          {isNew ? <SaveIcon /> : <TrashIcon />}
-        </button>
-      </div>
-    </div>
+    </fetcher.Form>
   );
 }
 

@@ -1,13 +1,17 @@
 import * as Recipe from "~/model/recipe";
 import * as Ingredient from "~/model/ingredient";
 import invariant from "tiny-invariant";
-import { isBlank } from "~/utils/validation";
 import { json } from "remix";
 import { getStringValue, getStringValues } from "~/utils/http";
+import { isEmpty } from "~/utils/misc";
 
-type ParsedFormData = { [key: string]: string };
 type Errors = { [key: string]: string };
+
 export async function saveRecipie(recipeId: string, formData: FormData) {
+  // Step 1: parse data out of form
+  const name = getStringValue(formData, "name");
+  const totalTime = getStringValue(formData, "totalTime");
+  const instructions = getStringValue(formData, "instructions");
   const ingredientIds = getStringValues(formData, "ingredientId");
   const ingredientAmounts = getStringValues(formData, "ingredientAmount");
   const ingredientNames = getStringValues(formData, "ingredientName");
@@ -16,10 +20,26 @@ export async function saveRecipie(recipeId: string, formData: FormData) {
       ingredientAmounts.length === ingredientNames.length,
     "Ingredient arrays must have the same length"
   );
+
+  // Step 2: validate
+  const errors = validateRecipe({
+    name,
+    totalTime,
+    instructions,
+    ingredientIds,
+    ingredientAmounts,
+    ingredientNames,
+  });
+
+  if (!isEmpty(errors)) {
+    return json({ errors });
+  }
+
+  // Step 3: save
   const recipiePromise = Recipe.updateRecipe(recipeId, {
-    name: getStringValue(formData, "name", false),
-    totalTime: getStringValue(formData, "totalTime", false),
-    instructions: getStringValue(formData, "instructions", false),
+    name,
+    totalTime,
+    instructions,
   });
   const ingredientPromises = ingredientIds.map((id, index) => {
     const amount = ingredientAmounts[index];
@@ -30,22 +50,46 @@ export async function saveRecipie(recipeId: string, formData: FormData) {
     });
   });
   await Promise.all([recipiePromise, ...ingredientPromises]);
+
   return "ok";
 }
 
-export function validateRecipe(recipeData: {
-  [key: string]: string | undefined;
-}) {
+type RecipeData = {
+  name?: string;
+  totalTime?: string;
+  instructions?: string;
+  ingredientIds: Array<string>;
+  ingredientAmounts: Array<string>;
+  ingredientNames: Array<string>;
+};
+export function validateRecipe({
+  name,
+  totalTime,
+  instructions,
+  ingredientIds,
+  ingredientAmounts,
+  ingredientNames,
+}: RecipeData) {
   const errors: Errors = {};
-  if (isBlank(recipeData.name)) {
-    errors.name = "Name cannot be blank";
+  if (name === "") {
+    errors.name = "Required";
   }
-  if (isBlank(recipeData.totalTime)) {
-    errors.totalTime = "Time cannot be blank";
+  if (totalTime === "") {
+    errors.totalTime = "Required";
   }
-  if (isBlank(recipeData.instructions)) {
-    errors.instructions = "Instructions cannot be blank";
+  if (instructions === "") {
+    errors.instructions = "Required";
   }
+  ingredientIds.forEach((id, index) => {
+    const ingredient = {
+      id,
+      amount: ingredientAmounts[index],
+      name: ingredientNames[index],
+    };
+    if (ingredient.name === "") {
+      errors[`ingredient.${id}.name`] = "Required";
+    }
+  });
   return errors;
 }
 
@@ -54,24 +98,6 @@ export function deleteRecipe(recipeId: string) {
     return json({ errors: { recipeId: "Required" } });
   }
   return Recipe.deleteRecipe(recipeId);
-}
-
-export function addIngredient(recipeId: string, formData: FormData) {
-  const errors: Errors = {};
-  if (!recipeId) {
-    errors["recipeId"] = "Required";
-  }
-  if (!formData.get("name")) {
-    errors["name"] = "Required";
-  }
-  return Ingredient.createOrUpdateIngredient(
-    recipeId,
-    getStringValue(formData, "id"),
-    {
-      name: getStringValue(formData, "name"),
-      amount: getStringValue(formData, "amount"),
-    }
-  );
 }
 
 export function deleteIngredient(ingredientId: string) {
