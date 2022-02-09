@@ -1,3 +1,11 @@
+/*
+  Warnings:
+
+  - You are about to drop the column `updatedAt` on the `PantryItem` table. All the data in the column will be lost.
+  - Added the required column `shelfId` to the `PantryItem` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `updatedAt` to the `User` table without a default value. This is not possible if the table is not empty.
+
+*/
 -- DropForeignKey
 ALTER TABLE "PantryItem" DROP CONSTRAINT "PantryItem_userId_fkey";
 
@@ -6,11 +14,11 @@ ALTER TABLE "Recipe" DROP CONSTRAINT "Recipe_userId_fkey";
 
 -- AlterTable
 ALTER TABLE "PantryItem" DROP COLUMN "updatedAt",
-ADD COLUMN     "shelfId" TEXT NOT NULL DEFAULT "";
+ADD COLUMN     "shelfId" TEXT NOT NULL;
 
 -- AlterTable
 ALTER TABLE "User" ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
+ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL;
 
 -- CreateTable
 CREATE TABLE "PantryShelf" (
