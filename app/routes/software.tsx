@@ -22,6 +22,7 @@ export default function Software() {
         links={[
           { to: "recipes", label: "Recipes" },
           { to: "pantry", label: "Pantry" },
+          { to: "meal-plan", label: "Meal Plan" },
         ]}
       />
       <PageContent>

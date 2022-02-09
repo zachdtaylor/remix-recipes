@@ -46,8 +46,7 @@ export default function Recipes() {
   const transition = useTransition();
   const fetchers = useFetchers();
 
-  const isSearchSubmitting =
-    transition.submission?.formData.get("_action") === "search";
+  const isSearchSubmitting = transition.submission?.formData.has("q");
   const isAddSubmitting =
     transition.submission?.formData.get("_action") === "add";
 
@@ -60,7 +59,6 @@ export default function Recipes() {
         )}
       >
         <Form className="flex border-2 border-gray-300 rounded-md">
-          <input type="hidden" name="_action" value="search" />
           <button className="pl-3 pr-2 mr-1">
             {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
           </button>
