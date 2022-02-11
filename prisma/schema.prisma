@@ -11,16 +11,17 @@ datasource db {
 }
 
 model Recipe {
-  id           String       @id @default(uuid())
-  createdAt    DateTime     @default(now())
-  updatedAt    DateTime     @updatedAt
-  name         String
-  instructions String
-  totalTime    String
-  image        String
-  ingredients  Ingredient[]
-  userId       String
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String         @id @default(uuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  name          String
+  instructions  String
+  totalTime     String
+  image         String
+  ingredients   Ingredient[]
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealPlanItems MealPlanItem[]
 }
 
 model Ingredient {
@@ -35,15 +36,16 @@ model Ingredient {
 }
 
 model User {
-  id          String        @id @default(uuid())
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  email       String        @unique
-  firstName   String
-  lastName    String
-  recipes     Recipe[]
-  pantry      PantryShelf[]
-  pantryItems PantryItem[]
+  id            String         @id @default(uuid())
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  email         String         @unique
+  firstName     String
+  lastName      String
+  recipes       Recipe[]
+  pantry        PantryShelf[]
+  pantryItems   PantryItem[]
+  mealPlanItems MealPlanItem[]
 }
 
 model PantryShelf {
@@ -64,4 +66,24 @@ model PantryItem {
   shelf     PantryShelf @relation(fields: [shelfId], references: [id], onDelete: Cascade)
   userId    String
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum Day {
+  sunday
+  monday
+  tuesday
+  wednesday
+  thursday
+  friday
+  saturday
+}
+
+model MealPlanItem {
+  id        String   @id @default(uuid())
+  day       Day
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+  createdAt DateTime @default(now())
 }
