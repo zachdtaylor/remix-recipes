@@ -52,7 +52,7 @@ export default function MealPlanDay() {
     <div>
       <ul>
         {data.dayPlan.map((item) => (
-          <li className="my-4">
+          <li key={item.id} className="my-4">
             <Form reloadDocument method="post">
               <input type="hidden" name="planItemId" value={item.id} />
               <button name="_action" value="remove-recipe" className="w-full">
@@ -69,7 +69,7 @@ export default function MealPlanDay() {
       <SearchBar placeholder="Search recipes" />
       <ul className="my-4">
         {data.searchedRecipes.map((recipe) => (
-          <li className="my-4">
+          <li key={recipe.id} className="my-4">
             <Form reloadDocument method="post">
               <input type="hidden" name="recipeId" value={recipe.id} />
               <button name="_action" value="add-recipe" className="w-full">
