@@ -280,6 +280,10 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
             form={hydrated ? formId : "recipe-form"}
             placeholder="---"
             onBlur={() => !isNew && form.ifChanged("amount", save)}
+            onEnter={(e) => {
+              e.preventDefault();
+              save();
+            }}
             className="w-full"
           />
         </div>
@@ -291,6 +295,10 @@ function IngredientRow({ ingredient, isNew, onSave }: IngredientRowProps) {
             onChange={(e) => form.setValue("name", e.target.value)}
             form={hydrated ? formId : "recipe-form"}
             onBlur={() => form.ifChanged("name", save)}
+            onEnter={(e) => {
+              e.preventDefault();
+              save();
+            }}
             error={fetcher.data?.errors?.[`ingredient.${ingredient.id}.name`]}
             className="w-full"
           />
