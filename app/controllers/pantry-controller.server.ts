@@ -2,23 +2,31 @@ import { json } from "remix";
 import * as PantryItem from "~/model/pantry-item";
 import * as PantryShelf from "~/model/pantry-shelf";
 import { isEmpty } from "~/utils/misc";
+import { z, ZodError } from "zod";
 
 type ParsedFormData = { [key: string]: string };
 type Errors = { [key: string]: string };
-export function createPantryItem(userId: string, formData: ParsedFormData) {
-  const errors: Errors = {};
-  if (!formData.name) {
-    errors["name"] = "Required";
+
+const pantryItemSchema = z.object({
+  name: z.string(),
+  shelfId: z.string(),
+  itemId: z.string().optional(),
+});
+
+export function createPantryItem(userId: string, fd: ParsedFormData) {
+  let formData;
+  try {
+    formData = pantryItemSchema.parse(fd);
+  } catch (e) {
+    if (e instanceof ZodError) {
+      return json({ errors: e.flatten().fieldErrors });
+    }
+    return json("An unknown error occurred while parsing form data");
   }
-  if (!formData.shelfId) {
-    errors["shelfId"] = "Required";
-  }
-  return isEmpty(errors)
-    ? PantryItem.createPantryItem(userId, formData.shelfId, {
-        name: formData.name.trim(),
-        id: formData.itemId === "" ? undefined : formData.itemId,
-      })
-    : json({ errors });
+  return PantryItem.createPantryItem(userId, formData.shelfId, {
+    name: formData.name.trim(),
+    id: formData.itemId === "" ? undefined : formData.itemId,
+  });
 }
 
 export function deletePantryItem(formData: ParsedFormData) {
