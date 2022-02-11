@@ -74,8 +74,8 @@ type RecipeCardProps = {
   title: string;
   totalTime: string;
   image?: string;
-  isActive: boolean;
-  isLoading: boolean;
+  isActive?: boolean;
+  isLoading?: boolean;
 };
 export function RecipeCard({
   title,

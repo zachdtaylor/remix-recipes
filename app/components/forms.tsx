@@ -1,6 +1,7 @@
 import React from "react";
-import { Link } from "remix";
+import { Form, Link, useSearchParams, useTransition } from "remix";
 import { classNames } from "~/utils/misc";
+import { LoadingIcon, SearchIcon } from "./icons";
 
 type InputProps = {
   name?: string;
@@ -229,5 +230,26 @@ export function LinkButton({
     <Link to={to} className="bg-primary text-white px-3 py-2 rounded-md">
       {children}
     </Link>
+  );
+}
+
+export function SearchBar({ placeholder }: { placeholder: string }) {
+  const [searchParams] = useSearchParams();
+  const transition = useTransition();
+  const isSearchSubmitting = transition.submission?.formData.has("q");
+  return (
+    <Form className="flex border-2 border-gray-300 rounded-md">
+      <button className="pl-3 pr-2 mr-1">
+        {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
+      </button>
+      <input
+        className="w-full py-3 px-2 rounded-md"
+        type="text"
+        name="q"
+        placeholder={placeholder}
+        defaultValue={searchParams.get("q") || ""}
+        autoComplete="off"
+      />
+    </Form>
   );
 }

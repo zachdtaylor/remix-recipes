@@ -13,7 +13,7 @@ import type { LoaderFunction, ActionFunction } from "remix";
 import { useLoaderData } from "remix";
 import type { Recipe as RecipeType } from "@prisma/client";
 import * as Recipe from "~/model/recipe";
-import { PrimaryButton } from "~/components/forms";
+import { PrimaryButton, SearchBar } from "~/components/forms";
 import { RecipeCard } from "~/components/lib";
 import { LoadingIcon, PlusIcon, SearchIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
@@ -42,11 +42,9 @@ export default function Recipes() {
   const data = useLoaderData<LoaderData>();
   const params = useParams();
   const location = useLocation();
-  const [searchParams] = useSearchParams();
   const transition = useTransition();
   const fetchers = useFetchers();
 
-  const isSearchSubmitting = transition.submission?.formData.has("q");
   const isAddSubmitting =
     transition.submission?.formData.get("_action") === "add";
 
@@ -58,19 +56,7 @@ export default function Recipes() {
           params.id ? "hidden" : ""
         )}
       >
-        <Form className="flex border-2 border-gray-300 rounded-md">
-          <button className="pl-3 pr-2 mr-1">
-            {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
-          </button>
-          <input
-            className="w-full py-3 px-2 rounded-md"
-            type="text"
-            name="q"
-            placeholder="Search recipes"
-            defaultValue={searchParams.get("q") || ""}
-            autoComplete="off"
-          />
-        </Form>
+        <SearchBar placeholder="Search recipes" />
         <ul>
           <li className="my-4">
             <Form method="post" action="/software/recipes">
