@@ -39,7 +39,7 @@ function PageNavLink({
       to={to}
       className={({ isActive }) =>
         classNames(
-          "pb-2.5 px-2",
+          "pb-2.5 px-2 md:px-4",
           isActive ? " border-b-2 border-b-primary" : "",
           className
         )
@@ -76,11 +76,13 @@ type RecipeCardProps = {
   image?: string;
   isActive?: boolean;
   isLoading?: boolean;
+  children?: React.ReactNode;
 };
 export function RecipeCard({
   title,
   totalTime,
   image,
+  children,
   isActive,
   isLoading,
 }: RecipeCardProps) {
@@ -97,8 +99,8 @@ export function RecipeCard({
       <div className="w-14 h-14 rounded-full overflow-hidden my-4 ml-3">
         <img src={image} className="object-cover h-full w-full" />
       </div>
-      <div className="p-4">
-        <h3 className="font-semibold mb-1">{title}</h3>
+      <div className="p-4 flex-grow">
+        <h3 className="font-semibold mb-1 text-left">{title}</h3>
         <RecipeTime
           totalTime={totalTime}
           className={classNames(
@@ -107,6 +109,7 @@ export function RecipeCard({
           )}
         />
       </div>
+      {children}
     </div>
   );
 }
