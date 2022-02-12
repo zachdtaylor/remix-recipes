@@ -7,8 +7,8 @@ import { getParsed } from "~/utils/validation";
 
 export async function searchRecipes(
   userId: string,
-  day: Day,
-  q: string | null
+  q: string | null,
+  day?: string
 ) {
   const [recipes, dayPlan] = await Promise.all([
     Recipe.searchRecipes(userId, q),
@@ -21,8 +21,11 @@ export async function searchRecipes(
   );
 }
 
-export async function getDayPlan(userId: string, day: Day) {
-  return MealPlanItem.getItemsForDay(userId, day);
+export async function getDayPlan(userId: string, day?: string) {
+  if (typeof day === "undefined" || day === "") {
+    return [];
+  }
+  return MealPlanItem.getItemsForDay(userId, day as Day);
 }
 
 const addRecipeToMealPlanSchema = z.object({

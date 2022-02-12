@@ -49,7 +49,7 @@ export default function Recipes() {
     transition.submission?.formData.get("_action") === "add";
 
   return (
-    <div className="lg:flex h-full">
+    <div className="py-8 lg:flex h-full">
       <div
         className={classNames(
           "lg:block lg:w-1/3 lg:pr-4 overflow-auto",

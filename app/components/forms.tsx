@@ -233,12 +233,21 @@ export function LinkButton({
   );
 }
 
-export function SearchBar({ placeholder }: { placeholder: string }) {
+export function SearchBar({
+  action,
+  placeholder,
+}: {
+  action?: string;
+  placeholder: string;
+}) {
   const [searchParams] = useSearchParams();
   const transition = useTransition();
   const isSearchSubmitting = transition.submission?.formData.has("q");
   return (
-    <Form className="flex border-2 border-gray-300 rounded-md">
+    <Form
+      className="flex border-2 border-gray-300 rounded-md"
+      action={action || ""}
+    >
       <button className="pl-3 pr-2 mr-1">
         {isSearchSubmitting ? <LoadingIcon /> : <SearchIcon />}
       </button>

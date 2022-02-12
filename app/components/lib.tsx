@@ -67,7 +67,7 @@ export function PageNav({ links }: PageNavProps) {
 }
 
 export function PageContent({ children }: { children: React.ReactNode }) {
-  return <div className="py-8 flex-grow overflow-auto">{children}</div>;
+  return <div className="flex-grow overflow-auto">{children}</div>;
 }
 
 type RecipeCardProps = {

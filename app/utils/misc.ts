@@ -122,3 +122,12 @@ export function useOptimisticItems<T extends OptimisticItem>(
 
   return { renderedItems, addItem };
 }
+
+export function useRouteData<T>(routeId: string) {
+  const matches = useMatches();
+  const matched = matches.find((match) => match.id === routeId);
+  if (typeof matched === "undefined") {
+    return null;
+  }
+  return matched.data as T;
+}

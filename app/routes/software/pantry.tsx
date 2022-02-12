@@ -69,7 +69,7 @@ export default function Pantry() {
   }, [isCreatingShelf]);
 
   return (
-    <div>
+    <div className="py-8">
       <Form method="post">
         <PrimaryButton
           name="_action"
