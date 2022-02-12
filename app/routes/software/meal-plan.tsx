@@ -1,6 +1,6 @@
 import { Form, NavLink, Outlet, useParams } from "remix";
 import { SearchBar } from "~/components/forms";
-import { classNames, useRouteData } from "~/utils/misc";
+import { classNames, daysOfTheWeek, useRouteData } from "~/utils/misc";
 import { RecipeCard } from "~/components/lib";
 import { LoaderData } from "./meal-plan/$day";
 import React from "react";
@@ -10,40 +10,32 @@ export default function MealPlan() {
   const params = useParams();
   return (
     <div className="flex w-full h-full overflow-x-auto snap-mandatory snap-x">
-      <ul
-        className={classNames(
-          "w-[calc(100vw-2rem)]",
-          "flex flex-col h-full lg:flex-auto lg:w-0 lg:flex",
-          "overflow-auto border-r-2 border-r-gray-200",
-          params.day ? "hidden" : ""
-        )}
-      >
-        {[
-          "Sunday",
-          "Monday",
-          "Tuesday",
-          "Wednesday",
-          "Thursday",
-          "Friday",
-          "Saturday",
-        ].map((day) => (
-          <li key={day} className="flex-grow flex-shrink-0">
-            <NavLink to={day.toLowerCase()}>
-              {({ isActive }) => (
-                <div
-                  className={classNames(
-                    "h-full p-4 border-b-2 border-b-gray-200",
-                    "flex flex-col justify-center",
-                    isActive ? "text-white font-bold bg-primary" : ""
-                  )}
-                >
-                  {day}
-                </div>
-              )}
-            </NavLink>
-          </li>
-        ))}
-      </ul>
+      <SnapSection>
+        <ul
+          className={classNames(
+            "flex flex-col h-full",
+            "lg:border-r-2 lg:border-r-gray-200"
+          )}
+        >
+          {daysOfTheWeek().map((day) => (
+            <li key={day} className="lg:flex-grow lg:flex-shrink-0 h-20 lg:h-0">
+              <NavLink to={day.toLowerCase()}>
+                {({ isActive }) => (
+                  <div
+                    className={classNames(
+                      "h-full p-4 border-b-2 border-b-gray-200",
+                      "flex flex-col justify-center",
+                      isActive ? "text-white font-bold bg-primary" : ""
+                    )}
+                  >
+                    {day}
+                  </div>
+                )}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
+      </SnapSection>
       <SnapSection className="lg:px-6">
         <Outlet />
       </SnapSection>

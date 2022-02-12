@@ -131,3 +131,20 @@ export function useRouteData<T>(routeId: string) {
   }
   return matched.data as T;
 }
+
+export function daysOfTheWeek() {
+  return [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+}
+
+export function getToday() {
+  const date = new Date();
+  return daysOfTheWeek()[date.getDay()];
+}
