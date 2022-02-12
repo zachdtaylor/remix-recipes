@@ -34,7 +34,7 @@ export default function MealPlan() {
                   className={classNames(
                     "h-full p-4 border-b-2 border-b-gray-200",
                     "flex flex-col justify-center",
-                    isActive ? "text-primary" : ""
+                    isActive ? "text-white font-bold bg-primary" : ""
                   )}
                 >
                   {day}
