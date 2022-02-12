@@ -1,14 +1,18 @@
 import {
   ActionFunction,
+  ErrorBoundaryComponent,
   Form,
   LoaderFunction,
   useLoaderData,
   useParams,
+  json,
+  useCatch,
 } from "remix";
 import { requireAuthSession } from "~/utils/auth.server";
 import * as Recipe from "~/model/recipe";
 import * as MealPlanController from "~/controllers/meal-plan-controller.server";
-import { RecipeCard } from "~/components/lib";
+import { ErrorSection, RecipeCard } from "~/components/lib";
+import { daysOfTheWeek } from "~/utils/misc";
 
 export type LoaderData = {
   searchedRecipes: Awaited<ReturnType<typeof Recipe.searchRecipes>>;
@@ -18,6 +22,12 @@ export type LoaderData = {
 export const loader: LoaderFunction = async ({ request, params }) => {
   const session = await requireAuthSession(request);
   const userId = session.get("userId");
+  if (!daysOfTheWeek().find((day) => day.toLowerCase() === params.day)) {
+    throw json(
+      { message: `${params.day} is not a day of the week` },
+      { status: 400 }
+    );
+  }
   const url = new URL(request.url);
   const q = url.searchParams.get("q");
   const [searched, planned] = await Promise.all([
@@ -77,3 +87,19 @@ export default function MealPlanDay() {
     </div>
   );
 }
+
+export const ErrorBoundary: ErrorBoundaryComponent = ({ error }) => {
+  return (
+    <ErrorSection
+      title="An unexpected error occurred"
+      message={error.message}
+    />
+  );
+};
+
+export const CatchBoundary = () => {
+  const caught = useCatch();
+  return (
+    <ErrorSection title={caught.statusText} message={caught.data.message} />
+  );
+};
