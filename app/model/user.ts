@@ -9,6 +9,6 @@ export function getUserByEmail(email: string) {
   });
 }
 
-export function createUser(data: Omit<User, "id">) {
+export function createUser(data: Omit<User, "id" | "createdAt" | "updatedAt">) {
   return db.user.create({ data: data });
 }
