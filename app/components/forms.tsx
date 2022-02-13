@@ -233,11 +233,18 @@ export function LinkButton({
   );
 }
 
-export function CheckButton(props: ButtonProps) {
+export function CheckButton({ className, ...props }: ButtonProps) {
   return (
-    <Button {...props} className={classNames("rounded-full")}>
+    <button
+      {...props}
+      className={classNames(
+        "h-8 w-8 p-1 text-center rounded-full",
+        "hover:bg-primary hover:text-white",
+        className
+      )}
+    >
       <CheckIcon />
-    </Button>
+    </button>
   );
 }
 

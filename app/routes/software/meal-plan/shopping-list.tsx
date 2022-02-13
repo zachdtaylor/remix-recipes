@@ -37,15 +37,15 @@ export default function ShoppingList() {
         {data.shoppingList.map((item) => (
           <li key={item.name} className="py-2">
             <div className="flex">
+              <Form reloadDocument method="post">
+                <input type="hidden" name="name" value={item.name} />
+                <CheckButton className="mr-2" aria-label="Add to Pantry" />
+              </Form>
               <span className="flex flex-col justify-center uppercase tracking-wider">
                 {item.name}
               </span>
-              <Form reloadDocument method="post">
-                <input type="hidden" name="name" value={item.name} />
-                <CheckButton />
-              </Form>
             </div>
-            <ul className="pl-4 pt-2">
+            <ul className="pl-10 pt-2">
               {item.through.map((owner, index) => (
                 <li key={index} className="pb-1">
                   {owner.amount} for {owner.recipe.name} on{" "}

@@ -42,7 +42,7 @@ export default function AppSettings() {
   const data = useLoaderData();
   const actionData = useActionData();
   return (
-    <Form reloadDocument method="post">
+    <Form reloadDocument method="post" className="py-8">
       <div className="pb-4 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <label className="flex flex-col">
           Color Theme
