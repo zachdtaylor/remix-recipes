@@ -35,3 +35,14 @@ export async function deleteIngredient(id: string) {
     throw e;
   }
 }
+
+export async function findIngredients(names: Array<string>) {
+  return db.ingredient.groupBy({
+    by: ["name"],
+    where: {
+      name: {
+        in: names,
+      },
+    },
+  });
+}

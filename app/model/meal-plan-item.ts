@@ -23,6 +23,26 @@ export function getItemsForDay(userId: string, day: Day) {
   });
 }
 
+export function getItemsForDayDeep(userId: string, day: Day) {
+  return db.mealPlanItem.findMany({
+    where: {
+      userId,
+      day,
+    },
+    include: {
+      recipe: {
+        include: {
+          ingredients: {
+            include: {
+              recipe: true,
+            },
+          },
+        },
+      },
+    },
+  });
+}
+
 export function createItem(userId: string, recipeId: string, day: Day) {
   return db.mealPlanItem.create({
     data: {

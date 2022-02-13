@@ -5,41 +5,64 @@ import { RecipeCard } from "~/components/lib";
 import { LoaderData } from "./meal-plan/$day";
 import React from "react";
 
+function getLink(text: string) {
+  if (text === "Shopping List") {
+    return "shopping-list";
+  }
+  return text.toLowerCase();
+}
+
 export default function MealPlan() {
   const data = useRouteData<LoaderData>("routes/software/meal-plan/$day");
   const params = useParams();
   return (
-    <div className="flex w-full h-full overflow-x-auto snap-mandatory snap-x">
-      <SnapSection>
-        <ul
-          className={classNames(
-            "flex flex-col h-full",
-            "lg:border-r-2 lg:border-r-gray-200"
-          )}
-        >
-          {daysOfTheWeek().map((day) => (
-            <li key={day} className="lg:flex-grow lg:flex-shrink-0 h-20 lg:h-0">
-              <NavLink to={day.toLowerCase()}>
-                {({ isActive }) => (
-                  <div
-                    className={classNames(
-                      "h-full p-4 border-b-2 border-b-gray-200",
-                      "flex flex-col justify-center",
-                      isActive ? "text-white font-bold bg-primary" : ""
-                    )}
-                  >
-                    {day}
-                  </div>
-                )}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
+    <div
+      className={classNames(
+        "flex w-full h-full overflow-x-auto snap-mandatory snap-x"
+      )}
+    >
+      <SnapSection className="lg:flex-auto">
+        <div className="h-full ">
+          <ul
+            className={classNames(
+              "flex flex-col h-full",
+              "lg:border-r-2 lg:border-r-gray-200"
+            )}
+          >
+            {["Shopping List", ...daysOfTheWeek()].map((item) => (
+              <li
+                key={item}
+                className="lg:flex-grow lg:flex-shrink-0 h-20 lg:h-0"
+              >
+                <NavLink to={getLink(item)}>
+                  {({ isActive }) => (
+                    <div
+                      className={classNames(
+                        "h-full p-4 border-b-2 border-b-gray-200",
+                        "flex flex-col justify-center",
+                        isActive ? "text-white font-bold bg-primary" : ""
+                      )}
+                    >
+                      {item}
+                    </div>
+                  )}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </div>
       </SnapSection>
-      <SnapSection className="lg:px-6">
+      <SnapSection
+        className={classNames(
+          "lg:px-6",
+          params.day ? "lg:flex-grow" : "grow-[2]"
+        )}
+      >
         <Outlet />
       </SnapSection>
-      <SnapSection className={!params.day ? "hidden" : ""}>
+      <SnapSection
+        className={classNames("lg:flex-grow", !params.day ? "hidden" : "")}
+      >
         <h1 className="py-4 text-center uppercase font-bold tracking-wide">
           Search
         </h1>
@@ -84,7 +107,7 @@ function SnapSection({
       className={classNames(
         "w-[calc(100vw-2rem)] flex-none snap-center",
         "md:w-[calc(100vw-6rem)]",
-        "lg:flex-auto lg:w-0 overflow-auto",
+        "lg:w-0 overflow-auto",
         className
       )}
     >

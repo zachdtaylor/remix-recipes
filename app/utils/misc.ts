@@ -148,3 +148,7 @@ export function getToday() {
   const date = new Date();
   return daysOfTheWeek()[date.getDay()];
 }
+
+export function capitalize(value: string) {
+  return value.slice(0, 1).toUpperCase() + value.slice(1);
+}

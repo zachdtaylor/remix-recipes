@@ -1,7 +1,7 @@
 import React from "react";
 import { Form, Link, useSearchParams, useTransition } from "remix";
 import { classNames } from "~/utils/misc";
-import { LoadingIcon, SearchIcon } from "./icons";
+import { CheckIcon, LoadingIcon, SearchIcon } from "./icons";
 
 type InputProps = {
   name?: string;
@@ -151,7 +151,7 @@ export function DynamicTextArea({
 }
 
 type ButtonProps = {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className?: string;
   type?: "submit" | "button" | "reset";
   name?: string;
@@ -230,6 +230,14 @@ export function LinkButton({
     <Link to={to} className="bg-primary text-white px-3 py-2 rounded-md">
       {children}
     </Link>
+  );
+}
+
+export function CheckButton(props: ButtonProps) {
+  return (
+    <Button {...props} className={classNames("rounded-full")}>
+      <CheckIcon />
+    </Button>
   );
 }
 
