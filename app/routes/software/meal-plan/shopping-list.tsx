@@ -7,6 +7,7 @@ import {
   PrimaryButton,
   SecondaryButton,
 } from "~/components/forms";
+import { getStringValue } from "~/utils/http";
 
 type LoaderData = {
   shoppingList: Awaited<ReturnType<typeof MealPlanController.getShoppingList>>;
@@ -21,7 +22,8 @@ export const loader: LoaderFunction = async ({ request }) => {
 export const action: ActionFunction = async ({ request }) => {
   const session = await requireAuthSession(request);
   const userId = session.get("userId");
-  return null;
+  const formData = await request.formData();
+  return MealPlanController.addItemToPantry(userId, formData.get("name"));
 };
 
 export default function ShoppingList() {

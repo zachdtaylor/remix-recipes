@@ -2,6 +2,14 @@ import { PantryShelf, Prisma } from "@prisma/client";
 import { db } from "~/utils/db.server";
 import { PRISMA_ERROR_RECORD_NOT_FOUND } from "~/utils/prisma.server";
 
+export function getPantryShelf(name: string) {
+  return db.pantryShelf.findFirst({
+    where: {
+      name,
+    },
+  });
+}
+
 export function getPantryShelves(userId: string) {
   return db.pantryShelf.findMany({
     where: {
@@ -20,11 +28,11 @@ export function getPantryShelves(userId: string) {
   });
 }
 
-export function createPantryShelf(userId: string) {
+export function createPantryShelf(userId: string, name?: string) {
   return db.pantryShelf.create({
     data: {
       userId,
-      name: "New Shelf",
+      name: name || "New Shelf",
     },
   });
 }

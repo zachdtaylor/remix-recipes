@@ -8,6 +8,7 @@ import { z } from "zod";
 import * as Recipe from "~/model/recipe";
 import * as MealPlanItem from "~/model/meal-plan-item";
 import * as PantryItem from "~/model/pantry-item";
+import * as PantryShelf from "~/model/pantry-shelf";
 import { getParsed } from "~/utils/validation";
 import { daysOfTheWeek } from "~/utils/misc";
 
@@ -147,4 +148,29 @@ function dedupe(shoppingList: Array<ShoppingListItem>) {
     name,
     through,
   }));
+}
+
+const addItemToPantrySchema = z.object({
+  name: z.string(),
+});
+
+const weeklyShelfName = "Weekly Shopping List";
+export async function addItemToPantry(
+  userId: string,
+  name: FormDataEntryValue | null
+) {
+  const parsed = getParsed(addItemToPantrySchema, { name });
+  if ("errors" in parsed) {
+    return json(parsed);
+  }
+  let mealPlanShelf = await PantryShelf.getPantryShelf(weeklyShelfName);
+  if (mealPlanShelf == null) {
+    mealPlanShelf = await PantryShelf.createPantryShelf(
+      userId,
+      weeklyShelfName
+    );
+  }
+  return PantryItem.createPantryItem(userId, mealPlanShelf.id, {
+    name: parsed.name,
+  });
 }
