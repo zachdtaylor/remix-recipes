@@ -5,6 +5,8 @@ node_modules
 /public/build
 /app/tailwind.css
 .env
+.env.development
+.env.test
 .env.production
 basic.conf
 
