@@ -44,3 +44,9 @@ Cypress.Commands.add(
     cy.visit(`/__tests/login?${query.toString()}`);
   }
 );
+
+Cypress.Commands.add("deleteUser", ({ email }) => {
+  const query = new URLSearchParams();
+  query.set("email", email);
+  cy.visit(`/__tests/delete-user?${query.toString()}`);
+});

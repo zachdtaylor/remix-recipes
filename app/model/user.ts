@@ -1,5 +1,6 @@
 import { User } from "@prisma/client";
 import { db } from "~/utils/db.server";
+import { handleDelete } from "./util";
 
 export function getUserByEmail(email: string) {
   return db.user.findUnique({
@@ -11,4 +12,14 @@ export function getUserByEmail(email: string) {
 
 export function createUser(data: Omit<User, "id" | "createdAt" | "updatedAt">) {
   return db.user.create({ data: data });
+}
+
+export function deleteUser(email: string) {
+  return handleDelete(() =>
+    db.user.delete({
+      where: {
+        email,
+      },
+    })
+  );
 }

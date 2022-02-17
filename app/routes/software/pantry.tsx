@@ -117,7 +117,11 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
       )}
     >
       <fetcher.Form method="post" className="flex">
+        <label hidden htmlFor={`shelfName.${shelf.id}`}>
+          Shelf Name
+        </label>
         <TextInput
+          id={`shelfName.${shelf.id}`}
           name="shelfName"
           defaultValue={shelf.name}
           placeholder="Shelf Name"
@@ -167,7 +171,11 @@ function Shelf({ shelf }: { shelf: TPantryShelf }) {
       >
         <fieldset className="flex justify-between py-4">
           <input type="hidden" name="shelfId" value={shelf.id} />
+          <label hidden htmlFor={`newItem.${shelf.id}`}>
+            New Item
+          </label>
           <TextInput
+            id={`newItem.${shelf.id}`}
             name="name"
             placeholder="New Item"
             error={fetcher.data?.errors?.name}
@@ -202,7 +210,11 @@ function ShelfItem({ item }: { item: PickedItem }) {
     <fetcher.Form method="post" className="flex justify-between py-2 group">
       <p>{item.name}</p>
       <input type="hidden" name="itemId" value={item.id} />
+      <label hidden htmlFor={`delete-${item.id}`}>
+        Delete {item.name}
+      </label>
       <button
+        id={`delete-${item.id}`}
         name="_action"
         value="delete-item"
         className="opacity-0 focus:opacity-100 group-hover:opacity-100 transition-opacity"

@@ -4,6 +4,7 @@ import { classNames } from "~/utils/misc";
 import { CheckIcon, LoadingIcon, SearchIcon } from "./icons";
 
 type InputProps = {
+  id?: string;
   name?: string;
   placeholder?: string;
   defaultValue?: string;
