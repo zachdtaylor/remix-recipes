@@ -4,7 +4,6 @@ import {
   useParams,
   useLocation,
   redirect,
-  useSearchParams,
   Form,
   useTransition,
   useFetchers,
@@ -15,7 +14,7 @@ import type { Recipe as RecipeType } from "@prisma/client";
 import * as Recipe from "~/model/recipe";
 import { PrimaryButton, SearchBar } from "~/components/forms";
 import { RecipeCard } from "~/components/lib";
-import { LoadingIcon, PlusIcon, SearchIcon } from "~/components/icons";
+import { PlusIcon } from "~/components/icons";
 import { classNames } from "~/utils/misc";
 import { requireAuthSession } from "~/utils/auth.server";
 
